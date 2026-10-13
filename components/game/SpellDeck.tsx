@@ -13,15 +13,21 @@ import {
   X,
   Plus,
   Minus,
+  ChevronUp,
+  ChevronDown,
+  Sparkles,
 } from "lucide-react";
 import { soundManager } from "@/lib/audio/soundManager";
+import { Badge } from "@/components/ui/Badge";
 
 interface SpellDeckProps {
   nodes: AstNode[];
   activeNodeId?: string;
   misfireNodeId?: string;
+  parSteps?: number;
   onRemoveNode: (nodeId: string) => void;
   onClearDeck: () => void;
+  onMoveNode?: (fromIndex: number, toIndex: number) => void;
   onUpdateRepeatCount?: (nodeId: string, newCount: number) => void;
   onAddSubAction?: (repeatId: string, command: CommandType) => void;
   onRemoveSubAction?: (repeatId: string, subIndex: number) => void;
@@ -33,8 +39,10 @@ export function SpellDeck({
   nodes,
   activeNodeId,
   misfireNodeId,
+  parSteps,
   onRemoveNode,
   onClearDeck,
+  onMoveNode,
   onUpdateRepeatCount,
   onAddSubAction,
   onRemoveSubAction,
@@ -44,15 +52,15 @@ export function SpellDeck({
   const getCommandInfo = (command: CommandType) => {
     switch (command) {
       case "STEP_FORWARD":
-        return { label: "Maju 1 Langkah", icon: ArrowUp, bg: "bg-spell-teal-700/60 border-spell-teal-500/40" };
+        return { label: "Maju 1 Langkah", icon: ArrowUp, bg: "bg-spell-teal-700/60 border-spell-teal-500/40 text-spell-teal-200" };
       case "TURN_LEFT":
-        return { label: "Putar Kiri", icon: RotateCcw, bg: "bg-spell-purple-800/80 border-spell-purple-500/40" };
+        return { label: "Putar Kiri", icon: RotateCcw, bg: "bg-spell-purple-800/80 border-spell-purple-500/40 text-spell-purple-200" };
       case "TURN_RIGHT":
-        return { label: "Putar Kanan", icon: RotateCw, bg: "bg-spell-purple-800/80 border-spell-purple-500/40" };
+        return { label: "Putar Kanan", icon: RotateCw, bg: "bg-spell-purple-800/80 border-spell-purple-500/40 text-spell-purple-200" };
       case "LIGHT_TORCH":
-        return { label: "Nyalakan Lentera", icon: Flame, bg: "bg-spell-gold-600/60 border-spell-gold-400/50" };
+        return { label: "Nyalakan Lentera", icon: Flame, bg: "bg-spell-gold-600/60 border-spell-gold-400/50 text-spell-gold-200" };
       case "COLLECT_SHARD":
-        return { label: "Ambil Kristal", icon: Diamond, bg: "bg-cyan-700/60 border-cyan-400/40" };
+        return { label: "Ambil Kristal", icon: Diamond, bg: "bg-cyan-700/60 border-cyan-400/40 text-cyan-200" };
     }
   };
 
@@ -68,15 +76,48 @@ export function SpellDeck({
     onClearDeck();
   };
 
+  const handleMove = (fromIndex: number, toIndex: number) => {
+    if (disabled || !onMoveNode) return;
+    soundManager.playClick();
+    onMoveNode(fromIndex, toIndex);
+  };
+
+  // Indikator Efisiensi Langkah (Par Steps Rating)
+  const getEfficiencyBadge = () => {
+    if (!parSteps) return null;
+    const count = nodes.length;
+    if (count <= parSteps) {
+      return (
+        <Badge variant="gold" size="sm">
+          <Sparkles className="w-3 h-3 mr-1" />
+          <span>Optimal (Par {parSteps}) ⭐⭐⭐</span>
+        </Badge>
+      );
+    } else if (count <= parSteps + 2) {
+      return (
+        <Badge variant="teal" size="sm">
+          <span>Bagus (Par +{count - parSteps}) ⭐⭐</span>
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge variant="coral" size="sm">
+          <span>Panjang (+{count - parSteps}) ⭐</span>
+        </Badge>
+      );
+    }
+  };
+
   return (
     <div className="w-full flex flex-col rounded-card bg-spell-purple-950 border border-spell-purple-800 shadow-card-fantasy overflow-hidden">
       {/* Header Meja Mantra */}
-      <div className="flex items-center justify-between px-4 py-3 bg-spell-purple-900 border-b border-spell-purple-800">
-        <div className="flex items-center gap-2">
-          <span className="text-base font-extrabold text-white">📜 Meja Mantra</span>
-          <span className="px-2 py-0.5 rounded-full bg-spell-purple-800 text-xs text-spell-teal-300 font-bold">
+      <div className="flex flex-wrap items-center justify-between px-4 py-3 bg-spell-purple-900 border-b border-spell-purple-800 gap-2">
+        <div className="flex items-center gap-2.5">
+          <span className="text-base font-black text-white">📜 Meja Mantra</span>
+          <span className="px-2.5 py-0.5 rounded-full bg-spell-purple-800 border border-spell-purple-700 text-xs text-spell-teal-300 font-bold font-mono">
             {nodes.length} Blok
           </span>
+          {getEfficiencyBadge()}
         </div>
 
         {nodes.length > 0 && (
@@ -85,6 +126,8 @@ export function SpellDeck({
             disabled={disabled}
             onClick={handleClear}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold text-spell-coral-400 hover:text-spell-coral-300 hover:bg-spell-coral-500/10 transition-colors disabled:opacity-40"
+            title="Kosongkan seluruh meja mantra"
+            aria-label="Kosongkan Meja Mantra"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>Bersihkan</span>
@@ -93,15 +136,15 @@ export function SpellDeck({
       </div>
 
       {/* Konten Daftar Slot Mantra */}
-      <div className="p-3 sm:p-4 min-h-[220px] max-h-[340px] overflow-y-auto flex flex-col gap-2.5">
+      <div className="p-3 sm:p-4 min-h-[200px] max-h-[360px] overflow-y-auto flex flex-col gap-2">
         {nodes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center my-auto py-8 text-center px-4">
-            <div className="w-12 h-12 rounded-full bg-spell-purple-900 flex items-center justify-center text-spell-purple-400 mb-2 border border-spell-purple-800">
+          <div className="flex flex-col items-center justify-center my-auto py-10 text-center px-4">
+            <div className="w-12 h-12 rounded-2xl bg-spell-purple-900 flex items-center justify-center text-spell-purple-400 mb-2 border border-spell-purple-800 shadow-inner">
               <span className="text-xl">✨</span>
             </div>
-            <p className="text-sm font-bold text-spell-purple-200">Meja Mantra Masih Kosong</p>
-            <p className="text-xs text-spell-purple-400 mt-1 max-w-[260px]">
-              Klik tombol rune di rak bawah untuk meracik mantra pertamamu!
+            <p className="text-sm font-bold text-white">Meja Mantra Masih Kosong</p>
+            <p className="text-xs text-spell-purple-300 mt-1 max-w-[280px] leading-relaxed">
+              Klik salah satu tombol rune di rak bawah untuk mulai meracik instruksi sihirmu!
             </p>
           </div>
         ) : (
@@ -121,29 +164,58 @@ export function SpellDeck({
                     info.bg
                   } ${
                     isActive
-                      ? "ring-4 ring-spell-gold-400 scale-[1.02] shadow-glow-gold z-10"
+                      ? "ring-4 ring-spell-teal-400 bg-spell-teal-900/80 scale-[1.02] shadow-[0_0_20px_rgba(45,212,191,0.5)] z-10"
                       : isMisfire
-                      ? "ring-4 ring-spell-coral-400 bg-spell-coral-500/30"
-                      : "hover:border-spell-purple-400/40"
+                      ? "ring-4 ring-spell-coral-400 bg-spell-coral-950 border-spell-coral-500 animate-pulse"
+                      : "hover:border-spell-purple-400/50"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-md bg-black/30 flex items-center justify-center text-xs font-mono font-bold text-spell-purple-200">
+                    <span className="w-6 h-6 rounded-md bg-black/40 flex items-center justify-center text-xs font-mono font-black text-spell-purple-200">
                       {index + 1}
                     </span>
-                    <Icon className="w-4 h-4 text-spell-gold-300" />
+                    <Icon className="w-4 h-4 text-spell-gold-300 shrink-0" />
                     <span className="text-sm font-bold text-white">{info.label}</span>
                   </div>
 
-                  <button
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => handleRemove(node.id)}
-                    className="p-1 rounded-md text-spell-purple-400 hover:text-spell-coral-400 hover:bg-black/20 transition-colors disabled:opacity-40"
-                    aria-label={`Hapus langkah ${index + 1}`}
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                  {/* Kontrol Interaksi Blok: Naik, Turun, Hapus */}
+                  <div className="flex items-center gap-1">
+                    {onMoveNode && (
+                      <>
+                        <button
+                          type="button"
+                          disabled={disabled || index === 0}
+                          onClick={() => handleMove(index, index - 1)}
+                          className="p-1 rounded text-spell-purple-300 hover:text-white hover:bg-black/20 disabled:opacity-20 transition-colors"
+                          title="Geser ke atas"
+                          aria-label={`Geser langkah ${index + 1} ke atas`}
+                        >
+                          <ChevronUp className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={disabled || index === nodes.length - 1}
+                          onClick={() => handleMove(index, index + 1)}
+                          className="p-1 rounded text-spell-purple-300 hover:text-white hover:bg-black/20 disabled:opacity-20 transition-colors"
+                          title="Geser ke bawah"
+                          aria-label={`Geser langkah ${index + 1} ke bawah`}
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
+
+                    <button
+                      type="button"
+                      disabled={disabled}
+                      onClick={() => handleRemove(node.id)}
+                      className="p-1 rounded text-spell-purple-400 hover:text-spell-coral-400 hover:bg-black/20 transition-colors disabled:opacity-30 ml-1"
+                      title="Hapus balok ini"
+                      aria-label={`Hapus langkah ${index + 1}`}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               );
             }
@@ -154,11 +226,11 @@ export function SpellDeck({
               return (
                 <div
                   key={node.id}
-                  className={`p-3 rounded-rune border-2 border-dashed border-amber-500/60 bg-amber-950/20 flex flex-col gap-2 transition-all ${
+                  className={`p-3 rounded-rune border-2 border-dashed border-amber-500/70 bg-amber-950/25 flex flex-col gap-2 transition-all ${
                     isActive
-                      ? "ring-4 ring-spell-gold-400 shadow-glow-gold"
+                      ? "ring-4 ring-spell-gold-400 bg-amber-950/50 shadow-glow-gold scale-[1.01]"
                       : isMisfire
-                      ? "ring-4 ring-spell-coral-400 bg-spell-coral-500/30"
+                      ? "ring-4 ring-spell-coral-400 bg-spell-coral-950/60 border-spell-coral-500 animate-pulse"
                       : ""
                   }`}
                 >
@@ -168,13 +240,14 @@ export function SpellDeck({
                       <span className="w-6 h-6 rounded-md bg-amber-500/30 flex items-center justify-center text-xs font-mono font-bold text-spell-gold-300">
                         {index + 1}
                       </span>
-                      <Repeat className="w-4 h-4 text-spell-gold-400" />
+                      <Repeat className="w-4 h-4 text-spell-gold-400 shrink-0" />
                       <span className="text-sm font-extrabold text-spell-gold-300">
                         Ulangi {repeatNode.count} Kali:
                       </span>
                     </div>
 
                     <div className="flex items-center gap-1.5">
+                      {/* Counter Stepper */}
                       {onUpdateRepeatCount && (
                         <div className="flex items-center bg-spell-purple-900 rounded-md border border-spell-purple-700">
                           <button
@@ -201,11 +274,38 @@ export function SpellDeck({
                         </div>
                       )}
 
+                      {/* Reorder Buttons */}
+                      {onMoveNode && (
+                        <>
+                          <button
+                            type="button"
+                            disabled={disabled || index === 0}
+                            onClick={() => handleMove(index, index - 1)}
+                            className="p-1 rounded text-spell-purple-300 hover:text-white disabled:opacity-20"
+                            title="Geser ke atas"
+                            aria-label={`Geser blok perulangan ${index + 1} ke atas`}
+                          >
+                            <ChevronUp className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={disabled || index === nodes.length - 1}
+                            onClick={() => handleMove(index, index + 1)}
+                            className="p-1 rounded text-spell-purple-300 hover:text-white disabled:opacity-20"
+                            title="Geser ke bawah"
+                            aria-label={`Geser blok perulangan ${index + 1} ke bawah`}
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+
                       <button
                         type="button"
                         disabled={disabled}
                         onClick={() => handleRemove(node.id)}
-                        className="p-1 text-spell-purple-400 hover:text-spell-coral-400"
+                        className="p-1 text-spell-purple-400 hover:text-spell-coral-400 disabled:opacity-30"
+                        title="Hapus blok perulangan"
                         aria-label="Hapus blok perulangan"
                       >
                         <X className="w-4 h-4" />
@@ -214,10 +314,10 @@ export function SpellDeck({
                   </div>
 
                   {/* Isi di Dalam Blok Repeat */}
-                  <div className="pl-6 flex flex-col gap-1.5 border-l-2 border-amber-500/40 my-1">
+                  <div className="pl-6 flex flex-col gap-1.5 border-l-2 border-amber-500/50 my-1">
                     {repeatNode.body.length === 0 ? (
-                      <p className="text-xs text-amber-300/70 italic py-1">
-                        Pilih aksi untuk dimasukkan ke dalam perulangan ini:
+                      <p className="text-xs text-amber-300/80 italic py-1">
+                        Pilih aksi dari rak di bawah untuk dimasukkan ke dalam perulangan ini:
                       </p>
                     ) : (
                       repeatNode.body.map((subNode, subIdx) => {
@@ -248,6 +348,7 @@ export function SpellDeck({
                                 disabled={disabled}
                                 onClick={() => onRemoveSubAction(node.id, subIdx)}
                                 className="text-spell-purple-400 hover:text-spell-coral-400"
+                                aria-label={`Hapus sub-aksi ${subIdx + 1}`}
                               >
                                 <X className="w-3.5 h-3.5" />
                               </button>

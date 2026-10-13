@@ -1,8 +1,8 @@
 "use client";
 
-import React, { use, useEffect, useRef, useState } from "react";
+import React, { use, useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, Sparkles, AlertCircle } from "lucide-react";
+import { ArrowLeft, Sparkles, AlertCircle, Compass, Code2 } from "lucide-react";
 import { getLevelById, getNextLevel } from "@/lib/levels";
 import { LevelDefinition } from "@/lib/levels/types";
 import {
@@ -56,7 +56,7 @@ export default function PlayLevelPage({ params }: PageProps) {
 function LevelNotFoundView() {
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-spell-purple-900 border border-spell-coral-500/40 flex items-center justify-center text-spell-coral-400 mb-4">
+      <div className="w-16 h-16 rounded-2xl bg-spell-purple-900 border border-spell-coral-500/40 flex items-center justify-center text-spell-coral-400 mb-4 shadow-md">
         <AlertCircle className="w-8 h-8" />
       </div>
       <h1 className="text-2xl font-black text-white">Misi Tidak Ditemukan</h1>
@@ -75,7 +75,7 @@ function LevelNotFoundView() {
 
 function PlayLevelContent({ level }: { level: LevelDefinition }) {
   // Buat state grid awal dari konfigurasi level
-  const createInitialState = React.useCallback((): LevelGridState => ({
+  const createInitialState = useCallback((): LevelGridState => ({
     width: level.grid.width,
     height: level.grid.height,
     obstacles: level.grid.obstacles,
@@ -102,6 +102,7 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
   const [isVictoryModalOpen, setIsVictoryModalOpen] = useState<boolean>(false);
   const [evalResult, setEvalResult] = useState<EvaluationResult | null>(null);
   const [newRankNotice, setNewRankNotice] = useState<{ isNew: boolean; rank?: string }>({ isNew: false });
+  const [mobileView, setMobileView] = useState<"all" | "arena" | "editor">("all");
 
   // Ref untuk VM generator saat eksekusi berjalan
   const activeVmRef = useRef<Generator<ExecutionStep, void, unknown> | null>(null);
@@ -157,6 +158,21 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
       ...program,
       nodes: program.nodes.filter((n) => n.id !== nodeId),
     });
+  };
+
+  const handleMoveNode = (fromIndex: number, toIndex: number) => {
+    if (
+      fromIndex < 0 ||
+      fromIndex >= program.nodes.length ||
+      toIndex < 0 ||
+      toIndex >= program.nodes.length
+    ) {
+      return;
+    }
+    const newNodes = [...program.nodes];
+    const [moved] = newNodes.splice(fromIndex, 1);
+    newNodes.splice(toIndex, 0, moved);
+    updateProgram({ ...program, nodes: newNodes });
   };
 
   const handleClearDeck = () => {
@@ -360,14 +376,14 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
   };
 
   return (
-    <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex flex-col gap-6">
+    <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex flex-col gap-5">
       {/* Top Header & Breadcrumb */}
-      <div className="flex items-center justify-between pb-3 border-b border-spell-purple-800">
+      <div className="flex flex-wrap items-center justify-between pb-3 border-b border-spell-purple-800 gap-3">
         <div className="flex items-center gap-3">
           <Link
             href="/map"
             className="p-2 rounded-xl bg-spell-purple-900 hover:bg-spell-purple-800 text-spell-purple-200 hover:text-white border border-spell-purple-700 transition-colors"
-            title="Kembali ke Peta"
+            title="Kembali ke Peta Dunia"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
@@ -387,61 +403,110 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
         {/* Par Steps Target Info */}
         <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-spell-purple-900 border border-spell-purple-700 text-xs font-bold text-spell-gold-300">
           <Sparkles className="w-4 h-4 text-spell-gold-400" />
-          <span>Rekor Optimal: Par {level.parSteps}</span>
+          <span>Rekor Optimal: Par {level.parSteps} Langkah</span>
         </div>
+      </div>
+
+      {/* Mobile Screen Tab Toggle (Layar Kecil < 768px) */}
+      <div className="flex lg:hidden items-center justify-center p-1 rounded-rune bg-spell-purple-900/80 border border-spell-purple-800 self-center">
+        <button
+          type="button"
+          onClick={() => setMobileView("all")}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            mobileView === "all"
+              ? "bg-spell-purple-700 text-white shadow-sm"
+              : "text-spell-purple-300 hover:text-white"
+          }`}
+        >
+          Semua Tampilan
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileView("arena")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            mobileView === "arena"
+              ? "bg-spell-teal-700 text-white shadow-sm"
+              : "text-spell-purple-300 hover:text-white"
+          }`}
+        >
+          <Compass className="w-3.5 h-3.5" />
+          <span>Arena Saja</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileView("editor")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            mobileView === "editor"
+              ? "bg-spell-purple-700 text-white shadow-sm"
+              : "text-spell-purple-300 hover:text-white"
+          }`}
+        >
+          <Code2 className="w-3.5 h-3.5" />
+          <span>Editor Mantra</span>
+        </button>
       </div>
 
       {/* Main Gameplay Dual-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Kolom Kiri: Arena Viewport & Debugger Guide (5 Kolom) */}
-        <div className="lg:col-span-5 flex flex-col gap-4">
-          <ArenaGrid state={gridState} isMoving={isRunning} />
-          <DebuggerGuide
-            message={getGuideMessage()}
-            hintText={level.hint}
-            type={
-              gridState.status === "FAILED"
-                ? "misfire"
-                : gridState.status === "VICTORY"
-                ? "victory"
-                : "info"
-            }
-          />
-        </div>
+        {/* Kolom Kiri: Arena Viewport & Debugger Guide (5 Kolom di Desktop) */}
+        {(mobileView === "all" || mobileView === "arena") && (
+          <div className="lg:col-span-5 flex flex-col gap-4">
+            <ArenaGrid state={gridState} isMoving={isRunning} />
+            <DebuggerGuide
+              message={getGuideMessage()}
+              hintText={level.hint}
+              type={
+                gridState.status === "FAILED"
+                  ? "misfire"
+                  : gridState.status === "VICTORY"
+                  ? "victory"
+                  : "info"
+              }
+              onReset={handleReset}
+              onStepDebug={handleStep}
+            />
+          </div>
+        )}
 
-        {/* Kolom Kanan: Meja Mantra, Rak Rune & Kontrol (7 Kolom) */}
-        <div className="lg:col-span-7 flex flex-col gap-4">
-          <SpellDeck
-            nodes={program.nodes}
-            activeNodeId={activeNodeId}
-            misfireNodeId={misfireNodeId}
-            onRemoveNode={handleRemoveNode}
-            onClearDeck={handleClearDeck}
-            onUpdateRepeatCount={handleUpdateRepeatCount}
-            onAddSubAction={handleAddSubAction}
-            onRemoveSubAction={handleRemoveSubAction}
-            allowedRunes={level.allowedRunes}
-            disabled={isRunning}
-          />
+        {/* Kolom Kanan: Meja Mantra, Rak Rune & Kontrol (7 Kolom di Desktop) */}
+        {(mobileView === "all" || mobileView === "editor") && (
+          <div className="lg:col-span-7 flex flex-col gap-4">
+            <SpellDeck
+              nodes={program.nodes}
+              activeNodeId={activeNodeId}
+              misfireNodeId={misfireNodeId}
+              parSteps={level.parSteps}
+              onRemoveNode={handleRemoveNode}
+              onClearDeck={handleClearDeck}
+              onMoveNode={handleMoveNode}
+              onUpdateRepeatCount={handleUpdateRepeatCount}
+              onAddSubAction={handleAddSubAction}
+              onRemoveSubAction={handleRemoveSubAction}
+              allowedRunes={level.allowedRunes}
+              disabled={isRunning}
+            />
 
-          <BlockTray
-            allowedRunes={level.allowedRunes}
-            allowRepeat={level.allowRepeatRune}
-            onAddAction={handleAddAction}
-            onAddRepeat={handleAddRepeat}
-            disabled={isRunning}
-          />
+            <BlockTray
+              allowedRunes={level.allowedRunes}
+              allowRepeat={level.allowRepeatRune}
+              onAddAction={handleAddAction}
+              onAddRepeat={handleAddRepeat}
+              disabled={isRunning}
+            />
 
-          <ControlBar
-            isRunning={isRunning}
-            canPlay={program.nodes.length > 0}
-            onPlay={handlePlay}
-            onStep={handleStep}
-            onReset={handleReset}
-            speed={speed}
-            onToggleSpeed={() => setSpeed((s) => (s === 1 ? 2 : 1))}
-          />
-        </div>
+            <ControlBar
+              isRunning={isRunning}
+              canPlay={program.nodes.length > 0}
+              hasBlocks={program.nodes.length > 0}
+              onPlay={handlePlay}
+              onStep={handleStep}
+              onReset={handleReset}
+              onClear={handleClearDeck}
+              speed={speed}
+              onToggleSpeed={() => setSpeed((s) => (s === 1 ? 2 : 1))}
+            />
+          </div>
+        )}
       </div>
 
       {/* Victory Celebration Modal */}
