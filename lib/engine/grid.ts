@@ -1,10 +1,49 @@
+import { createEngineError } from "./errors";
 import {
   Direction,
   ExecutionStep,
   GridPosition,
   LevelGridState,
   PlayerState,
+  ShardEntity,
+  TorchEntity,
 } from "./types";
+
+export interface InitialGridConfig {
+  width: number;
+  height: number;
+  obstacles: GridPosition[];
+  shards: ShardEntity[];
+  torches: TorchEntity[];
+  portal: GridPosition;
+  playerStart: {
+    x: number;
+    y: number;
+    direction: Direction;
+  };
+}
+
+/**
+ * Membuat state grid awal yang murni dan bersih dari konfigurasi level.
+ */
+export function createInitialGridState(config: InitialGridConfig): LevelGridState {
+  return {
+    width: config.width,
+    height: config.height,
+    obstacles: config.obstacles.map((o) => ({ ...o })),
+    shards: config.shards.map((s) => ({ ...s })),
+    torches: config.torches.map((t) => ({ ...t })),
+    portal: { ...config.portal },
+    player: {
+      position: { x: config.playerStart.x, y: config.playerStart.y },
+      direction: config.playerStart.direction,
+      manaUsed: 0,
+      collectedShards: [],
+      litTorches: [],
+    },
+    status: "IDLE",
+  };
+}
 
 export function getNextDirection(current: Direction, turn: "LEFT" | "RIGHT"): Direction {
   const directions: Direction[] = ["UP", "RIGHT", "DOWN", "LEFT"];
@@ -38,12 +77,20 @@ export function isObstacle(pos: GridPosition, obstacles: GridPosition[]): boolea
   return obstacles.some((obs) => obs.x === pos.x && obs.y === pos.y);
 }
 
+/**
+ * Menerapkan satu langkah instruksi ke state arena secara deterministik dan murni (immutable).
+ */
 export function applyStep(state: LevelGridState, step: ExecutionStep): LevelGridState {
   if (state.status === "FAILED" || state.status === "VICTORY") {
     return state;
   }
 
-  const player: PlayerState = { ...state.player, manaUsed: state.player.manaUsed + 1 };
+  const player: PlayerState = {
+    ...state.player,
+    manaUsed: state.player.manaUsed + 1,
+    collectedShards: [...state.player.collectedShards],
+    litTorches: [...state.player.litTorches],
+  };
 
   switch (step.command) {
     case "TURN_LEFT": {
@@ -60,22 +107,34 @@ export function applyStep(state: LevelGridState, step: ExecutionStep): LevelGrid
       const nextPos = getForwardPosition(player.position, player.direction);
 
       if (isOutOfBounds(nextPos, state.width, state.height)) {
+        const errorDetails = createEngineError(
+          "WALL_COLLISION",
+          step.activeNodeId,
+          step.stepNumber
+        );
         return {
           ...state,
           player,
           status: "FAILED",
-          failureReason: "Hampir jatuh dari pulau sihir! Coba berbelok sebelum melangkah ke tepi.",
+          failureReason: errorDetails.kidExplanation,
           misfireNodeId: step.activeNodeId,
+          errorDetails,
         };
       }
 
       if (isObstacle(nextPos, state.obstacles)) {
+        const errorDetails = createEngineError(
+          "OBSTACLE_HIT",
+          step.activeNodeId,
+          step.stepNumber
+        );
         return {
           ...state,
           player,
           status: "FAILED",
-          failureReason: "Ups, terhalang semak berduri atau batu! Cari jalan memutar.",
+          failureReason: errorDetails.kidExplanation,
           misfireNodeId: step.activeNodeId,
+          errorDetails,
         };
       }
 
@@ -89,7 +148,7 @@ export function applyStep(state: LevelGridState, step: ExecutionStep): LevelGrid
       );
 
       if (shardAtPos && !player.collectedShards.includes(shardAtPos.id)) {
-        player.collectedShards = [...player.collectedShards, shardAtPos.id];
+        player.collectedShards.push(shardAtPos.id);
       }
       return { ...state, player, status: "RUNNING" };
     }
@@ -100,8 +159,13 @@ export function applyStep(state: LevelGridState, step: ExecutionStep): LevelGrid
       );
 
       if (torchAtPos && !player.litTorches.includes(torchAtPos.id)) {
-        player.litTorches = [...player.litTorches, torchAtPos.id];
+        player.litTorches.push(torchAtPos.id);
       }
+      return { ...state, player, status: "RUNNING" };
+    }
+
+    case "CAST_SPELL": {
+      // Perilaku aktivasi mantra umum
       return { ...state, player, status: "RUNNING" };
     }
 

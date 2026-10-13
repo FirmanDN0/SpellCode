@@ -1,14 +1,5 @@
-import { LevelGridState } from "./types";
-
-export interface EvaluationResult {
-  isVictory: boolean;
-  allShardsCollected: boolean;
-  allTorchesLit: boolean;
-  atPortal: boolean;
-  stars: number;
-  xpEarned: number;
-  message: string;
-}
+import { EvaluationResult, LevelGridState } from "./types";
+export type { EvaluationResult };
 
 export function evaluateLevelState(
   state: LevelGridState,

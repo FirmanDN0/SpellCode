@@ -54,6 +54,12 @@ export function BlockTray({
       colorClass: "bg-cyan-600 hover:bg-cyan-500 text-white border-cyan-300/40",
       shadowClass: "shadow-[0_4px_0_#0E7490]",
     },
+    CAST_SPELL: {
+      label: "Rapalkan Mantra",
+      icon: Flame,
+      colorClass: "bg-spell-gold-600 hover:bg-spell-gold-500 text-spell-purple-950 border-spell-gold-300/60",
+      shadowClass: "shadow-[0_4px_0_#B45309]",
+    },
   };
 
   const handleActionClick = (command: CommandType) => {

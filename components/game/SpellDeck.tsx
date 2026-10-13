@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import { ActionNode, AstNode, CommandType, RepeatNode } from "@/lib/engine/types";
+import { ActionNode, AstNode, CommandType, RepeatNode, IfNode } from "@/lib/engine/types";
 import {
   ArrowUp,
   RotateCcw,
@@ -61,6 +60,10 @@ export function SpellDeck({
         return { label: "Nyalakan Lentera", icon: Flame, bg: "bg-spell-gold-600/60 border-spell-gold-400/50 text-spell-gold-200" };
       case "COLLECT_SHARD":
         return { label: "Ambil Kristal", icon: Diamond, bg: "bg-cyan-700/60 border-cyan-400/40 text-cyan-200" };
+      case "CAST_SPELL":
+        return { label: "Lontarkan Mantra", icon: Sparkles, bg: "bg-purple-600/60 border-purple-400/50 text-purple-200" };
+      default:
+        return { label: "Aksi Khusus", icon: Sparkles, bg: "bg-spell-purple-700/60 border-spell-purple-500/40 text-spell-purple-200" };
     }
   };
 
@@ -373,6 +376,105 @@ export function SpellDeck({
                           </button>
                         ))}
                       </div>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+
+            if (node.type === "IF") {
+              const ifNode = node as IfNode;
+              const condLabels: Record<string, string> = {
+                IS_OBSTACLE_AHEAD: "Ada Rintangan di Depan",
+                IS_CLEAR_AHEAD: "Jalan Terbuka di Depan",
+                IS_SHARD_PRESENT: "Ada Kristal di Kotak Ini",
+                IS_TORCH_PRESENT: "Ada Lentera di Kotak Ini",
+                IS_PORTAL_PRESENT: "Ada Gerbang di Kotak Ini",
+              };
+
+              return (
+                <div
+                  key={node.id}
+                  className={`p-3 rounded-rune border-2 border-dashed border-cyan-500/70 bg-cyan-950/25 flex flex-col gap-2 transition-all ${
+                    isActive
+                      ? "ring-4 ring-cyan-400 bg-cyan-950/50 shadow-glow-cyan scale-[1.01]"
+                      : isMisfire
+                      ? "ring-4 ring-spell-coral-400 bg-spell-coral-950/60 border-spell-coral-500 animate-pulse"
+                      : ""
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-md bg-cyan-500/30 flex items-center justify-center text-xs font-mono font-bold text-cyan-300">
+                        {index + 1}
+                      </span>
+                      <span className="text-sm font-extrabold text-cyan-300">
+                        JIKA ({condLabels[ifNode.condition] || ifNode.condition}):
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      {onMoveNode && (
+                        <>
+                          <button
+                            type="button"
+                            disabled={disabled || index === 0}
+                            onClick={() => handleMove(index, index - 1)}
+                            className="p-1 rounded text-spell-purple-300 hover:text-white disabled:opacity-20"
+                            title="Geser ke atas"
+                            aria-label={`Geser blok jika ${index + 1} ke atas`}
+                          >
+                            <ChevronUp className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={disabled || index === nodes.length - 1}
+                            onClick={() => handleMove(index, index + 1)}
+                            className="p-1 rounded text-spell-purple-300 hover:text-white disabled:opacity-20"
+                            title="Geser ke bawah"
+                            aria-label={`Geser blok jika ${index + 1} ke bawah`}
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => handleRemove(node.id)}
+                        className="p-1 text-spell-purple-400 hover:text-spell-coral-400 disabled:opacity-30"
+                        title="Hapus blok jika"
+                        aria-label="Hapus blok jika"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Cabang Then */}
+                  <div className="pl-6 flex flex-col gap-1.5 border-l-2 border-cyan-500/50 my-1">
+                    <span className="text-[11px] font-bold text-cyan-400">Maka:</span>
+                    {ifNode.thenBody.length === 0 ? (
+                      <p className="text-xs text-cyan-300/60 italic py-1">Belum ada aksi</p>
+                    ) : (
+                      ifNode.thenBody.map((subNode: AstNode) => {
+                        if (subNode.type !== "ACTION") return null;
+                        const subAction = subNode as ActionNode;
+                        const info = getCommandInfo(subAction.command);
+                        const Icon = info.icon;
+                        return (
+                          <div
+                            key={subNode.id}
+                            className={`flex items-center justify-between px-2.5 py-1.5 rounded-md border text-xs font-bold ${info.bg}`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Icon className="w-3.5 h-3.5 text-spell-gold-300" />
+                              <span className="text-white">{info.label}</span>
+                            </div>
+                          </div>
+                        );
+                      })
                     )}
                   </div>
                 </div>
