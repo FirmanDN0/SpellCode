@@ -2,7 +2,7 @@
 
 import React from "react";
 import { CommandType } from "@/lib/engine/types";
-import { ArrowUp, RotateCcw, RotateCw, Flame, Diamond, Repeat } from "lucide-react";
+import { ArrowUp, RotateCcw, RotateCw, Flame, Diamond, Repeat, Sparkles } from "lucide-react";
 import { soundManager } from "@/lib/audio/soundManager";
 
 interface BlockTrayProps {
@@ -56,8 +56,14 @@ export function BlockTray({
     },
     CAST_SPELL: {
       label: "Rapalkan Mantra",
-      icon: Flame,
-      colorClass: "bg-spell-gold-600 hover:bg-spell-gold-500 text-spell-purple-950 border-spell-gold-300/60",
+      icon: Sparkles,
+      colorClass: "bg-purple-600 hover:bg-purple-500 text-white border-purple-300/40",
+      shadowClass: "shadow-[0_4px_0_#7E22CE]",
+    },
+    ACTIVATE: {
+      label: "Aktivasi Benda",
+      icon: Sparkles,
+      colorClass: "bg-amber-600 hover:bg-amber-500 text-white border-amber-300/40",
       shadowClass: "shadow-[0_4px_0_#B45309]",
     },
   };

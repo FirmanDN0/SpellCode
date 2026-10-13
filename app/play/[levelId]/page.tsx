@@ -20,7 +20,7 @@ import {
   createRepeatNode,
 } from "@/lib/engine/ast";
 import { createSpellVM } from "@/lib/engine/vm";
-import { applyStep } from "@/lib/engine/grid";
+import { applyStep, createInitialGridState } from "@/lib/engine/grid";
 import { evaluateLevelState, EvaluationResult } from "@/lib/engine/evaluator";
 import {
   getDraftAst,
@@ -74,23 +74,10 @@ function LevelNotFoundView() {
 }
 
 function PlayLevelContent({ level }: { level: LevelDefinition }) {
-  // Buat state grid awal dari konfigurasi level
-  const createInitialState = useCallback((): LevelGridState => ({
-    width: level.grid.width,
-    height: level.grid.height,
-    obstacles: level.grid.obstacles,
-    shards: level.grid.shards,
-    torches: level.grid.torches,
-    portal: level.grid.portal,
-    player: {
-      position: { ...level.grid.playerStart },
-      direction: level.grid.playerStart.direction,
-      manaUsed: 0,
-      collectedShards: [],
-      litTorches: [],
-    },
-    status: "IDLE",
-  }), [level]);
+  // Buat state grid awal dari konfigurasi level menggunakan factory murni engine
+  const createInitialState = useCallback((): LevelGridState => {
+    return createInitialGridState(level.grid);
+  }, [level]);
 
   const [gridState, setGridState] = useState<LevelGridState>(createInitialState);
   const [program, setProgram] = useState<SpellProgram>(createEmptyProgram);

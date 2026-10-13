@@ -4,7 +4,8 @@ export type CommandType =
   | "TURN_RIGHT"
   | "COLLECT_SHARD"
   | "LIGHT_TORCH"
-  | "CAST_SPELL";
+  | "CAST_SPELL"
+  | "ACTIVATE";
 
 export type ConditionType =
   | "IS_OBSTACLE_AHEAD"
@@ -42,6 +43,7 @@ export interface SpellProgram {
   nodes: AstNode[];
 }
 
+// Model Spasial & Entitas Karakter
 export type Direction = "UP" | "RIGHT" | "DOWN" | "LEFT";
 
 export interface GridPosition {
@@ -49,13 +51,30 @@ export interface GridPosition {
   y: number;
 }
 
-export interface PlayerState {
-  position: GridPosition;
+export type Position = GridPosition;
+
+export type TileType = "EMPTY" | "WALL" | "OBSTACLE" | "PORTAL" | "TORCH" | "SHARD";
+
+export interface Tile {
+  x: number;
+  y: number;
+  type: TileType;
+  hasObstacle: boolean;
+  hasShard: boolean;
+  hasTorch: boolean;
+  isPortal: boolean;
+}
+
+export interface CharacterState {
+  position: Position;
   direction: Direction;
   manaUsed: number;
   collectedShards: string[];
   litTorches: string[];
+  isAlive?: boolean;
 }
+
+export type PlayerState = CharacterState;
 
 export interface ShardEntity {
   id: string;
@@ -91,18 +110,39 @@ export interface EngineErrorDetails {
   stepNumber?: number;
 }
 
-export interface LevelGridState {
+export type ExecutionError = EngineErrorDetails;
+
+// Model Dunia Arena (WorldState & LevelGridState)
+export interface WorldState {
   width: number;
   height: number;
-  obstacles: GridPosition[];
+  obstacles: Position[];
   shards: ShardEntity[];
   torches: TorchEntity[];
-  portal: GridPosition;
-  player: PlayerState;
+  portal: Position;
+  character?: CharacterState;
+  player: CharacterState;
+  tiles?: Tile[][];
   status: SimulationStatus;
   failureReason?: string;
   misfireNodeId?: string;
   errorDetails?: EngineErrorDetails;
+}
+
+export type LevelGridState = WorldState;
+
+// Definisi Instruksi & Program
+export interface ProgramInstruction {
+  id: string;
+  command: CommandType;
+}
+
+export interface ProgramDefinition {
+  id?: string;
+  version: 1;
+  instructions: ProgramInstruction[];
+  maxInstructions?: number;
+  allowedRunes?: CommandType[];
 }
 
 export interface ExecutionStep {
@@ -115,6 +155,7 @@ export interface ExecutionStep {
   };
 }
 
+// Event Trace untuk Animasi UI dan Debugging
 export type ExecutionEventType =
   | "STEP_START"
   | "STEP_COMPLETE"
@@ -122,10 +163,21 @@ export type ExecutionEventType =
   | "PLAYER_TURN"
   | "SHARD_COLLECTED"
   | "TORCH_LIT"
+  | "OBJECT_ACTIVATED"
+  | "SPELL_CAST"
   | "CONDITION_EVALUATED"
   | "LOOP_ITERATION"
   | "ERROR"
   | "VICTORY";
+
+export interface ExecutionEventMetadata {
+  fromPosition?: Position;
+  toPosition?: Position;
+  fromDirection?: Direction;
+  toDirection?: Direction;
+  targetId?: string;
+  actionSuccess?: boolean;
+}
 
 export interface ExecutionEvent {
   type: ExecutionEventType;
@@ -136,6 +188,7 @@ export interface ExecutionEvent {
   conditionResult?: boolean;
   message?: string;
   playerState: PlayerState;
+  metadata?: ExecutionEventMetadata;
 }
 
 export interface ProgramValidationResult {
@@ -146,11 +199,27 @@ export interface ProgramValidationResult {
   maxDepth: number;
 }
 
+// Objective Level
+export type ObjectiveType =
+  | "REACH_PORTAL"
+  | "COLLECT_ALL_SHARDS"
+  | "LIGHT_ALL_TORCHES";
+
+export interface Objective {
+  id: string;
+  type: ObjectiveType;
+  description: string;
+  isCompleted: boolean;
+  requiredCount?: number;
+  currentCount?: number;
+}
+
 export interface EvaluationResult {
   isVictory: boolean;
   allShardsCollected: boolean;
   allTorchesLit: boolean;
   atPortal: boolean;
+  objectives?: Objective[];
   stars: number;
   xpEarned: number;
   message: string;
@@ -163,4 +232,26 @@ export interface ExecutionResult {
   finalState: LevelGridState;
   evaluation: EvaluationResult;
   errorDetails?: EngineErrorDetails;
+}
+
+export interface ExecutionState {
+  status: SimulationStatus;
+  currentStepIndex: number;
+  stepsTaken: number;
+  characterState: CharacterState;
+  worldState: WorldState;
+}
+
+export interface ExecutionLimits {
+  maxSteps: number;
+  maxInstructions: number;
+  maxDepth: number;
+  allowedRunes?: CommandType[];
+}
+
+export interface InstructionValidationResult {
+  canExecute: boolean;
+  errorCode?: EngineErrorCode;
+  reason?: string;
+  kidExplanation?: string;
 }

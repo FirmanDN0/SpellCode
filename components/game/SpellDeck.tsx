@@ -62,6 +62,8 @@ export function SpellDeck({
         return { label: "Ambil Kristal", icon: Diamond, bg: "bg-cyan-700/60 border-cyan-400/40 text-cyan-200" };
       case "CAST_SPELL":
         return { label: "Lontarkan Mantra", icon: Sparkles, bg: "bg-purple-600/60 border-purple-400/50 text-purple-200" };
+      case "ACTIVATE":
+        return { label: "Aktivasi Benda", icon: Sparkles, bg: "bg-amber-600/60 border-amber-400/50 text-amber-200" };
       default:
         return { label: "Aksi Khusus", icon: Sparkles, bg: "bg-spell-purple-700/60 border-spell-purple-500/40 text-spell-purple-200" };
     }

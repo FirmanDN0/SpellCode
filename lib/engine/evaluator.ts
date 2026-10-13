@@ -1,10 +1,11 @@
-import { EvaluationResult, LevelGridState } from "./types";
+import { EvaluationResult, LevelGridState, Objective } from "./types";
 export type { EvaluationResult };
 
 export function evaluateLevelState(
   state: LevelGridState,
   parSteps: number,
-  stepsTaken: number
+  stepsTaken: number,
+  customObjectives?: Objective[]
 ): EvaluationResult {
   const allShardsCollected =
     state.shards.length === 0 ||
@@ -48,11 +49,67 @@ export function evaluateLevelState(
     }
   }
 
+  // Evaluasi daftar objektif eksplisit
+  const objectives: Objective[] = customObjectives
+    ? customObjectives.map((obj) => {
+        if (obj.type === "REACH_PORTAL") {
+          return { ...obj, isCompleted: atPortal };
+        }
+        if (obj.type === "LIGHT_ALL_TORCHES") {
+          return {
+            ...obj,
+            currentCount: state.player.litTorches.length,
+            isCompleted: allTorchesLit,
+          };
+        }
+        if (obj.type === "COLLECT_ALL_SHARDS") {
+          return {
+            ...obj,
+            currentCount: state.player.collectedShards.length,
+            isCompleted: allShardsCollected,
+          };
+        }
+        return obj;
+      })
+    : [
+        {
+          id: "obj-portal",
+          type: "REACH_PORTAL",
+          description: "Tiba di gerbang portal kemenangan",
+          isCompleted: atPortal,
+        },
+        ...(state.torches.length > 0
+          ? [
+              {
+                id: "obj-torches",
+                type: "LIGHT_ALL_TORCHES" as const,
+                description: `Nyalakan seluruh lentera (${state.player.litTorches.length}/${state.torches.length})`,
+                requiredCount: state.torches.length,
+                currentCount: state.player.litTorches.length,
+                isCompleted: allTorchesLit,
+              },
+            ]
+          : []),
+        ...(state.shards.length > 0
+          ? [
+              {
+                id: "obj-shards",
+                type: "COLLECT_ALL_SHARDS" as const,
+                description: `Petik seluruh kristal mana (${state.player.collectedShards.length}/${state.shards.length})`,
+                requiredCount: state.shards.length,
+                currentCount: state.player.collectedShards.length,
+                isCompleted: allShardsCollected,
+              },
+            ]
+          : []),
+      ];
+
   return {
     isVictory,
     allShardsCollected,
     allTorchesLit,
     atPortal,
+    objectives,
     stars,
     xpEarned,
     message,

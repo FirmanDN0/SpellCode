@@ -3,6 +3,7 @@ import { world1Levels } from "./world1";
 import { world2Levels } from "./world2";
 
 export * from "./types";
+export * from "./fixtures";
 export { world1Levels } from "./world1";
 export { world2Levels } from "./world2";
 
