@@ -1,0 +1,143 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Sparkles, Map, BookOpen, User, Star, Zap, Menu, X } from "lucide-react";
+import { getGuestData, GuestData } from "@/lib/storage/guestStorage";
+import { SoundToggle } from "../ui/SoundToggle";
+import { cn } from "@/lib/utils";
+
+export function Navbar() {
+  const pathname = usePathname();
+  const [guestData, setGuestData] = useState<GuestData | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setGuestData(getGuestData());
+
+    const handleStorage = () => {
+      setGuestData(getGuestData());
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [pathname]);
+
+  const totalStars = guestData
+    ? Object.values(guestData.progress).reduce((acc, p) => acc + (p.stars || 0), 0)
+    : 0;
+
+  const totalXp = guestData?.profile.totalXp ?? 0;
+
+  const navLinks = [
+    { href: "/map", label: "Peta Petualangan", icon: Map },
+    { href: "/grimoire", label: "Buku Mantra", icon: BookOpen },
+    { href: "/profile", label: "Profil Magang", icon: User },
+  ];
+
+  return (
+    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-spell-purple-950/85 border-b border-spell-purple-800/80">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
+        {/* Brand Logo */}
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spell-teal-400 rounded-lg p-1"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-spell-purple-500 to-spell-purple-700 flex items-center justify-center shadow-rune-purple border border-spell-purple-400/40 group-hover:scale-105 transition-transform">
+            <Sparkles className="w-5 h-5 text-spell-gold-300" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-extrabold text-xl text-white tracking-wide group-hover:text-spell-gold-300 transition-colors">
+              Spell<span className="text-spell-teal-400">Code</span>
+            </span>
+            <span className="text-[10px] text-spell-purple-300 font-semibold tracking-wider uppercase -mt-1">
+              Akademi Sihir Pemrograman
+            </span>
+          </div>
+        </Link>
+
+        {/* Desktop Navigation Links */}
+        <nav className="hidden md:flex items-center gap-1.5" aria-label="Navigasi Utama">
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-rune text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spell-teal-400",
+                  isActive
+                    ? "bg-spell-purple-800 text-spell-gold-300 shadow-inner border border-spell-purple-600/60"
+                    : "text-spell-purple-200 hover:text-white hover:bg-spell-purple-900/60"
+                )}
+              >
+                <Icon className={cn("w-4 h-4", isActive ? "text-spell-gold-400" : "text-spell-purple-400")} />
+                <span>{link.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Player Stats & Utility Controls */}
+        <div className="flex items-center gap-2.5">
+          {/* Star Counter */}
+          <div
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-pill bg-spell-gold-500/15 border border-spell-gold-500/30 text-spell-gold-300 font-bold text-sm shadow-sm"
+            title="Total Bintang yang Diraih"
+          >
+            <Star className="w-4 h-4 fill-spell-gold-400 text-spell-gold-400" />
+            <span>{totalStars}</span>
+          </div>
+
+          {/* Mana XP Counter */}
+          <div
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-pill bg-spell-teal-500/15 border border-spell-teal-500/30 text-spell-teal-300 font-bold text-sm shadow-sm"
+            title="Total Mana XP"
+          >
+            <Zap className="w-4 h-4 fill-spell-teal-400 text-spell-teal-400" />
+            <span>{totalXp} XP</span>
+          </div>
+
+          {/* Sound Toggle Button */}
+          <SoundToggle />
+
+          {/* Mobile Menu Trigger */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-rune bg-spell-purple-800 text-spell-purple-200 hover:text-white border border-spell-purple-700"
+            aria-label="Buka Menu"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Drawer Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden px-4 pt-2 pb-4 bg-spell-purple-900 border-b border-spell-purple-700 flex flex-col gap-2">
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-rune font-bold text-base transition-colors",
+                  isActive
+                    ? "bg-spell-purple-800 text-spell-gold-300 border border-spell-purple-600"
+                    : "text-spell-purple-200 hover:bg-spell-purple-950/60"
+                )}
+              >
+                <Icon className="w-5 h-5 text-spell-teal-400" />
+                <span>{link.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </header>
+  );
+}
