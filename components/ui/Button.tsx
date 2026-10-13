@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { soundManager } from "@/lib/audio/soundManager";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "success" | "secondary" | "danger" | "ghost";
+  variant?: "primary" | "success" | "secondary" | "teal" | "danger" | "ghost";
   size?: "sm" | "md" | "lg" | "icon";
   disableSound?: boolean;
 }
@@ -41,6 +41,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         "bg-spell-emerald-500 hover:bg-spell-emerald-400 text-white shadow-[0_4px_0_#059669,0_8px_16px_rgba(16,185,129,0.3)] border-t border-spell-emerald-300",
       secondary:
         "bg-spell-purple-700 hover:bg-spell-purple-600 text-spell-purple-50 shadow-rune-purple border-t border-spell-purple-400",
+      teal:
+        "bg-spell-teal-600 hover:bg-spell-teal-500 text-white shadow-rune-teal border-t border-spell-teal-300",
       danger:
         "bg-spell-coral-500 hover:bg-spell-coral-400 text-white shadow-rune-coral border-t border-spell-coral-300",
       ghost:

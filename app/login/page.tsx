@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Sparkles, Mail, ArrowRight, ShieldCheck, ArrowLeft, CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button, Input } from "@/components/ui";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -46,24 +46,17 @@ export default function LoginPage() {
             </Button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="w-full my-6 flex flex-col gap-3">
-            <div className="relative text-left">
-              <label htmlFor="email" className="block text-xs font-bold text-spell-purple-300 mb-1">
-                Alamat Email Orang Tua / Guru
-              </label>
-              <div className="relative">
-                <Mail className="w-5 h-5 text-spell-purple-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  placeholder="orangtua@contoh.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 rounded-rune bg-spell-purple-950 border border-spell-purple-700 text-white placeholder-spell-purple-500 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-spell-teal-400 transition-all"
-                />
-              </div>
-            </div>
+          <form onSubmit={handleSubmit} className="w-full my-6 flex flex-col gap-4">
+            <Input
+              id="email"
+              type="email"
+              required
+              label="Alamat Email Orang Tua / Guru"
+              placeholder="orangtua@contoh.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              leftIcon={<Mail className="w-5 h-5" />}
+            />
 
             <Button variant="primary" size="lg" type="submit" className="w-full mt-2 font-bold">
               <span>Kirim Tautan Akses Sihir</span>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
+import { ToastProvider } from "@/components/ui/Toast";
 
 export const metadata: Metadata = {
   title: "SpellCode: Cast Spells with Code",
@@ -24,9 +25,11 @@ export default function RootLayout({
   return (
     <html lang="id" className="dark">
       <body className="flex flex-col min-h-screen bg-spell-purple-950 text-spell-purple-50">
-        <Navbar />
-        <main className="flex-1 flex flex-col">{children}</main>
-        <Footer />
+        <ToastProvider>
+          <Navbar />
+          <main className="flex-1 flex flex-col">{children}</main>
+          <Footer />
+        </ToastProvider>
       </body>
     </html>
   );
