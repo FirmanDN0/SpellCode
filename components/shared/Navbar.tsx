@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sparkles, Map, BookOpen, User, Star, Zap, Menu, X } from "lucide-react";
+import { Sparkles, Map, BookOpen, User, Star, Zap, Menu, X, Volume2 } from "lucide-react";
 import { getGuestData, GuestData } from "@/lib/storage/guestStorage";
 import { SoundToggle } from "../ui/SoundToggle";
 import { cn } from "@/lib/utils";
@@ -36,21 +36,21 @@ export function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-spell-purple-950/85 border-b border-spell-purple-800/80">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-spell-purple-950/90 border-b border-spell-purple-800/80">
+      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 h-16 sm:h-18 flex items-center justify-between">
         {/* Brand Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spell-teal-400 rounded-lg p-1"
+          className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spell-teal-400 rounded-lg p-1"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-spell-purple-500 to-spell-purple-700 flex items-center justify-center shadow-rune-purple border border-spell-purple-400/40 group-hover:scale-105 transition-transform">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-spell-purple-500 to-spell-purple-700 flex items-center justify-center shadow-rune-purple border border-spell-purple-400/40 group-hover:scale-105 transition-transform shrink-0">
             <Sparkles className="w-5 h-5 text-spell-gold-300" />
           </div>
           <div className="flex flex-col">
-            <span className="font-extrabold text-xl text-white tracking-wide group-hover:text-spell-gold-300 transition-colors">
+            <span className="font-black text-lg sm:text-xl text-white tracking-wide group-hover:text-spell-gold-300 transition-colors">
               Spell<span className="text-spell-teal-400">Code</span>
             </span>
-            <span className="text-[10px] text-spell-purple-300 font-semibold tracking-wider uppercase -mt-1">
+            <span className="hidden sm:inline text-[10px] text-spell-purple-300 font-semibold tracking-wider uppercase -mt-1">
               Akademi Sihir Pemrograman
             </span>
           </div>
@@ -80,42 +80,56 @@ export function Navbar() {
         </nav>
 
         {/* Player Stats & Utility Controls */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-2.5">
           {/* Star Counter */}
           <div
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-pill bg-spell-gold-500/15 border border-spell-gold-500/30 text-spell-gold-300 font-bold text-sm shadow-sm"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-spell-gold-500/15 border border-spell-gold-500/30 text-spell-gold-300 font-bold text-xs sm:text-sm shadow-sm"
             title="Total Bintang yang Diraih"
           >
-            <Star className="w-4 h-4 fill-spell-gold-400 text-spell-gold-400" />
+            <Star className="w-3.5 sm:w-4 h-3.5 sm:h-4 fill-spell-gold-400 text-spell-gold-400 shrink-0" />
             <span>{totalStars}</span>
           </div>
 
-          {/* Mana XP Counter */}
+          {/* Mana XP Counter - Ditampilkan di Desktop/Tablet */}
           <div
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-pill bg-spell-teal-500/15 border border-spell-teal-500/30 text-spell-teal-300 font-bold text-sm shadow-sm"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-spell-teal-500/15 border border-spell-teal-500/30 text-spell-teal-300 font-bold text-sm shadow-sm"
             title="Total Mana XP"
           >
-            <Zap className="w-4 h-4 fill-spell-teal-400 text-spell-teal-400" />
+            <Zap className="w-4 h-4 fill-spell-teal-400 text-spell-teal-400 shrink-0" />
             <span>{totalXp} XP</span>
           </div>
 
-          {/* Sound Toggle Button */}
-          <SoundToggle />
+          {/* Sound Toggle Button - Desktop/Tablet */}
+          <div className="hidden sm:block">
+            <SoundToggle />
+          </div>
 
           {/* Mobile Menu Trigger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-rune bg-spell-purple-800 text-spell-purple-200 hover:text-white border border-spell-purple-700"
-            aria-label="Buka Menu"
+            className="md:hidden p-2 rounded-rune bg-spell-purple-800 text-spell-purple-200 hover:text-white border border-spell-purple-700 min-w-[40px] min-h-[40px] flex items-center justify-center transition-colors"
+            aria-label="Buka Menu Navigasi"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden px-4 pt-2 pb-4 bg-spell-purple-900 border-b border-spell-purple-700 flex flex-col gap-2">
+        <div className="md:hidden px-4 pt-3 pb-5 bg-spell-purple-900 border-b border-spell-purple-700 flex flex-col gap-2.5 shadow-xl animate-in fade-in duration-150">
+          {/* Mobile Stats Banner */}
+          <div className="flex items-center justify-between p-2.5 rounded-xl bg-spell-purple-950/70 border border-spell-purple-800 mb-1 text-xs">
+            <div className="flex items-center gap-2 text-spell-teal-300 font-bold">
+              <Zap className="w-4 h-4 fill-spell-teal-400 text-spell-teal-400" />
+              <span>{totalXp} Total Mana XP</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-spell-purple-400">Efek Suara:</span>
+              <SoundToggle />
+            </div>
+          </div>
+
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
@@ -127,7 +141,7 @@ export function Navbar() {
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-rune font-bold text-base transition-colors",
                   isActive
-                    ? "bg-spell-purple-800 text-spell-gold-300 border border-spell-purple-600"
+                    ? "bg-spell-purple-800 text-spell-gold-300 border border-spell-purple-600 shadow-sm"
                     : "text-spell-purple-200 hover:bg-spell-purple-950/60"
                 )}
               >

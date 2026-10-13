@@ -412,7 +412,7 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
         <button
           type="button"
           onClick={() => setMobileView("all")}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+          className={`px-3 sm:px-4 py-2 min-h-[38px] rounded-lg text-xs font-bold transition-all ${
             mobileView === "all"
               ? "bg-spell-purple-700 text-white shadow-sm"
               : "text-spell-purple-300 hover:text-white"
@@ -423,7 +423,7 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
         <button
           type="button"
           onClick={() => setMobileView("arena")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 min-h-[38px] rounded-lg text-xs font-bold transition-all ${
             mobileView === "arena"
               ? "bg-spell-teal-700 text-white shadow-sm"
               : "text-spell-purple-300 hover:text-white"
@@ -435,7 +435,7 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
         <button
           type="button"
           onClick={() => setMobileView("editor")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 min-h-[38px] rounded-lg text-xs font-bold transition-all ${
             mobileView === "editor"
               ? "bg-spell-purple-700 text-white shadow-sm"
               : "text-spell-purple-300 hover:text-white"

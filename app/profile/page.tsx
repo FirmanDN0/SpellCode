@@ -108,7 +108,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setIsEditingName(true)}
-                  className="p-1 rounded-md text-spell-purple-400 hover:text-white"
+                  className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg bg-spell-purple-800/60 hover:bg-spell-purple-700 text-spell-purple-300 hover:text-white border border-spell-purple-700 transition-colors"
                   aria-label="Ubah Nama Tampilan"
                 >
                   <Edit2 className="w-4 h-4" />

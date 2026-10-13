@@ -49,3 +49,16 @@ h1, h2, h3, h4, .font-display {
   user-select: none;
   -webkit-user-select: none;
 }
+
+/* Aksesibilitas: Menghormati preferensi pengguna untuk reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
