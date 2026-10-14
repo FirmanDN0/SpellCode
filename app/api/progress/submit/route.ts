@@ -147,7 +147,9 @@ export async function POST(req: NextRequest) {
 
     // Simpan / update ke player_progress
     const newBestSteps =
-      existingProgress && existingProgress.best_step_count > 0
+      existingProgress &&
+      existingProgress.best_step_count !== null &&
+      existingProgress.best_step_count > 0
         ? Math.min(existingProgress.best_step_count, stepsTaken)
         : stepsTaken;
 

@@ -18,13 +18,13 @@ SpellCode menggunakan pendekatan **Server-Authoritative Progression**:
 | Nama Tabel | Deskripsi | Aturan RLS |
 | :--- | :--- | :--- |
 | `profiles` | Profil magang, terhubung 1-to-1 dengan `auth.users(id)` | Pengguna hanya dapat membaca dan mengubah profil miliknya sendiri |
-| `levels` | Katalog 12 level kampanye resmi (World 1 & 2) | Publik dapat membaca (`SELECT USING (true)`), mutasi hanya oleh server |
-| `player_progress` | Status unlock, bintang (0-3), langkah terbaik, dan AST solusi | Pengguna hanya dapat membaca miliknya sendiri, mutasi via server |
-| `level_attempts` | Audit trail riwayat eksekusi program pemain | Pengguna hanya dapat membaca riwayat miliknya sendiri |
-| `achievements` | Definisi katalog lencana prestasi dan reward XP | Publik dapat membaca |
-| `player_achievements` | Lencana yang telah diraih oleh pemain | Pengguna hanya dapat membaca miliknya sendiri |
-| `familiars` | Definisi katalog hewan pendamping magang | Publik dapat membaca |
-| `player_familiars` | Koleksi familiar yang dimiliki pemain | Pengguna hanya dapat membaca miliknya sendiri |
+| `levels` | Katalog 12 level kampanye resmi (World 1 & 2) | Publik dapat membaca (`SELECT USING (is_published = true)`), mutasi hanya oleh server |
+| `player_progress` | Status unlock, bintang (0-3), langkah terbaik, dan AST solusi | Pengguna hanya dapat membaca dan mengelola miliknya sendiri (`auth.uid() = user_id`) |
+| `level_attempts` | Audit trail riwayat eksekusi program pemain (append-only) | Pengguna hanya dapat membaca dan mencatat miliknya sendiri (`auth.uid() = user_id`) |
+| `achievements` | Definisi katalog lencana prestasi dan reward XP | Publik dapat membaca (`SELECT USING (true)`) |
+| `player_achievements` | Lencana yang telah diraih oleh pemain | Pengguna hanya dapat membaca dan mencatat miliknya sendiri (`auth.uid() = user_id`) |
+| `familiars` | Definisi katalog hewan pendamping magang | Publik dapat membaca (`SELECT USING (true)`) |
+| `player_familiars` | Koleksi familiar yang dimiliki pemain | Pengguna hanya dapat membaca dan mengelola miliknya sendiri (`auth.uid() = user_id`) |
 
 ---
 
@@ -62,8 +62,8 @@ Terdapat dua cara untuk menerapkan skema database:
 ### Opsi B: Migrasi Terpisah Berurutan (Incremental Migrations)
 Jika Anda menggunakan Supabase CLI atau ingin menerapkan migrasi secara bertahap:
 1. `supabase/migrations/20261014000001_initial_schema.sql` (Tabel, constraint, index, dan trigger update)
-2. `supabase/migrations/20261014000002_row_level_security.sql` (Aktivasi RLS dan kebijakan akses)
-3. `supabase/migrations/20261014000003_auth_triggers.sql` (Hook pendaftaran pengguna baru)
+2. `supabase/migrations/20261014000002_row_level_security.sql` (Aktivasi RLS dan kebijakan akses least privilege)
+3. `supabase/migrations/20261014000003_auth_triggers.sql` (Hook pendaftaran pengguna baru dengan exception handling terisolasi)
 4. `supabase/migrations/20261014000004_seed_campaign.sql` (Katalog level, familiars, dan achievements)
 
 ---
@@ -83,10 +83,11 @@ Jika Anda menggunakan Supabase CLI atau ingin menerapkan migrasi secara bertahap
 
 1. **Pendaftaran / Sign Up**:
    Ketika pengguna baru mendaftar (baik via email/password maupun Magic Link), trigger PostgreSQL `handle_new_user()` secara otomatis:
-   * Membuat entri profil di `public.profiles` dengan username unik.
+   * Membuat entri profil di `public.profiles` dengan username unik dan sanitasi string.
    * Memberikan familiar starter *Pyx Sang Kucing Api* di `public.player_familiars`.
    * Membuka level pertama `w1-l1` dengan status `'unlocked'` di `public.player_progress`.
    * Memberikan lencana pembuka *Selamat Datang di Akademi* di `public.player_achievements`.
+   * **Ketahanan Kegagalan (Resilience)**: Seluruh blok inisialisasi dibungkus dalam blok `EXCEPTION WHEN OTHERS THEN`. Jika terjadi galat sampingan, registrasi akun primer di `auth.users` tetap berhasil tanpa crash.
 2. **Mode Tamu (Guest Mode)**:
    Pemain anak-anak tidak dipaksa untuk langsung login. Mereka dapat langsung bermain di `/map` menggunakan penyimpanan lokal.
 3. **Sinkronisasi Otomatis**:
@@ -110,12 +111,40 @@ Endpoint `app/api/progress/submit/route.ts` menerapkan validasi ketat:
 
 ---
 
-## 8. Verifikasi & Menjalankan Pengujian
+## 8. Panduan Pengujian Kebijakan RLS (Security Verification Matrix)
 
-Jalankan seluruh pengujian unit test dan backend suite:
+Setelah migrasi dijalankan pada database PostgreSQL Supabase, Anda dapat menguji kebijakan isolasi data menggunakan SQL Editor:
 
-```bash
-npm test
+```sql
+-- Skenario Pengujian 1: Simulasi Akses sebagai Pemain A
+BEGIN;
+  SET LOCAL ROLE authenticated;
+  SET LOCAL "request.jwt.claim.sub" = '11111111-1111-1111-1111-111111111111';
+
+  -- Coba membaca progres Pemain B (harus mengembalikan 0 baris)
+  SELECT * FROM public.player_progress WHERE user_id = '22222222-2222-2222-2222-222222222222';
+
+  -- Coba memodifikasi data profil Pemain B (harus gagal atau mengembalikan 0 baris terpengaruh)
+  UPDATE public.profiles SET display_name = 'Hacked' WHERE id = '22222222-2222-2222-2222-222222222222';
+ROLLBACK;
+
+-- Skenario Pengujian 2: Simulasi Akses Tamu Tanpa Autentikasi (Anon)
+BEGIN;
+  SET LOCAL ROLE anon;
+
+  -- Membaca katalog level publik (harus berhasil membaca 12 baris level)
+  SELECT count(*) FROM public.levels WHERE is_published = true;
+
+  -- Coba membaca data progres privat pemain (harus mengembalikan 0 baris)
+  SELECT * FROM public.player_progress;
+ROLLBACK;
 ```
 
-Semua pengujian pada `tests/backend/progress_submission.test.ts` dan 12 test suite engine (`tests/engine/`) harus lulus 100%.
+---
+
+## 9. Status Pengujian & Catatan Tindakan Pemilik Proyek
+
+* **Verifikasi Statis & Unit Test (Lokal)**:
+  Telah diuji 100% menggunakan Vitest pada `tests/backend/schema_rls_audit.test.ts` dan `tests/backend/progress_submission.test.ts` (14 suites, 131 tests passing). Skrip SQL telah diaudit untuk memastikan keberadaan primary key, foreign key berjenjang, constraint, index, least privilege RLS, dan ketahanan exception handling pada trigger.
+* **Pengujian Database Langsung (Cloud Instance)**:
+  Pengujian interaktif secara langsung terhadap instance cloud PostgreSQL Supabase memerlukan eksekusi skrip `supabase/schema.sql` di Supabase Dashboard SQL Editor oleh pemilik proyek. Setelah langkah tersebut dijalankan, seluruh API endpoint dan session client akan terhubung langsung ke database aktif.

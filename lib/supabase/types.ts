@@ -64,22 +64,28 @@ export type Database = {
           title: string;
           description: string;
           concept_tag: string;
+          objective_text: string;
+          grid_config: Json;
+          allowed_runes: Json;
           par_steps: number;
           base_xp: number;
-          allowed_runes: Json;
+          is_published: boolean;
           created_at: string;
         };
         Insert: {
           id: string;
           world_number: number;
           level_number: number;
-          world_title: string;
+          world_title?: string;
           title: string;
           description: string;
-          concept_tag: string;
+          concept_tag?: string;
+          objective_text?: string;
+          grid_config?: Json;
+          allowed_runes?: Json;
           par_steps: number;
           base_xp?: number;
-          allowed_runes?: Json;
+          is_published?: boolean;
           created_at?: string;
         };
         Update: {
@@ -90,9 +96,12 @@ export type Database = {
           title?: string;
           description?: string;
           concept_tag?: string;
+          objective_text?: string;
+          grid_config?: Json;
+          allowed_runes?: Json;
           par_steps?: number;
           base_xp?: number;
-          allowed_runes?: Json;
+          is_published?: boolean;
           created_at?: string;
         };
         Relationships: [];
@@ -104,7 +113,7 @@ export type Database = {
           level_id: string;
           status: "unlocked" | "completed";
           stars: number;
-          best_step_count: number;
+          best_step_count: number | null;
           best_solution_ast: SpellProgram | null;
           attempts_count: number;
           first_completed_at: string | null;
@@ -114,9 +123,9 @@ export type Database = {
           id?: string;
           user_id: string;
           level_id: string;
-          status: "unlocked" | "completed";
+          status?: "unlocked" | "completed";
           stars?: number;
-          best_step_count?: number;
+          best_step_count?: number | null;
           best_solution_ast?: SpellProgram | null;
           attempts_count?: number;
           first_completed_at?: string | null;
@@ -128,7 +137,7 @@ export type Database = {
           level_id?: string;
           status?: "unlocked" | "completed";
           stars?: number;
-          best_step_count?: number;
+          best_step_count?: number | null;
           best_solution_ast?: SpellProgram | null;
           attempts_count?: number;
           first_completed_at?: string | null;
@@ -156,11 +165,13 @@ export type Database = {
           id: string;
           user_id: string;
           level_id: string;
+          submitted_ast: SpellProgram;
           is_success: boolean;
+          result_status: string;
           steps_taken: number;
           stars_earned: number;
           xp_earned: number;
-          submitted_ast: SpellProgram;
+          execution_time_ms: number;
           error_message: string | null;
           created_at: string;
         };
@@ -168,11 +179,13 @@ export type Database = {
           id?: string;
           user_id: string;
           level_id: string;
-          is_success: boolean;
+          submitted_ast: SpellProgram;
+          is_success?: boolean;
+          result_status?: string;
           steps_taken: number;
           stars_earned?: number;
           xp_earned?: number;
-          submitted_ast: SpellProgram;
+          execution_time_ms?: number;
           error_message?: string | null;
           created_at?: string;
         };
@@ -180,11 +193,13 @@ export type Database = {
           id?: string;
           user_id?: string;
           level_id?: string;
+          submitted_ast?: SpellProgram;
           is_success?: boolean;
+          result_status?: string;
           steps_taken?: number;
           stars_earned?: number;
           xp_earned?: number;
-          submitted_ast?: SpellProgram;
+          execution_time_ms?: number;
           error_message?: string | null;
           created_at?: string;
         };
@@ -275,25 +290,37 @@ export type Database = {
         Row: {
           id: string;
           name: string;
+          species: string;
           element: string;
+          lore_description: string;
           description: string;
+          asset_key: string;
           rarity: string;
+          unlock_xp_required: number;
           created_at: string;
         };
         Insert: {
           id: string;
           name: string;
-          element: string;
-          description: string;
+          species?: string;
+          element?: string;
+          lore_description?: string;
+          description?: string;
+          asset_key?: string;
           rarity?: string;
+          unlock_xp_required?: number;
           created_at?: string;
         };
         Update: {
           id?: string;
           name?: string;
+          species?: string;
           element?: string;
+          lore_description?: string;
           description?: string;
+          asset_key?: string;
           rarity?: string;
+          unlock_xp_required?: number;
           created_at?: string;
         };
         Relationships: [];
@@ -303,18 +330,24 @@ export type Database = {
           id: string;
           user_id: string;
           familiar_id: string;
+          bond_level: number;
+          is_active: boolean;
           unlocked_at: string;
         };
         Insert: {
           id?: string;
           user_id: string;
           familiar_id: string;
+          bond_level?: number;
+          is_active?: boolean;
           unlocked_at?: string;
         };
         Update: {
           id?: string;
           user_id?: string;
           familiar_id?: string;
+          bond_level?: number;
+          is_active?: boolean;
           unlocked_at?: string;
         };
         Relationships: [
