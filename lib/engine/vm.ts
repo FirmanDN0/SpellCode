@@ -2,13 +2,25 @@ import { evaluateCondition } from "./condition";
 import {
   AstNode,
   ExecutionStep,
+  IfNode,
   LevelGridState,
+  RepeatNode,
   SpellProgram,
 } from "./types";
 
 export interface VmOptions {
   maxSteps?: number;
   getState?: () => LevelGridState;
+  onConditionEvaluated?: (
+    node: IfNode,
+    result: boolean,
+    branchTaken: "THEN" | "ELSE"
+  ) => void;
+  onLoopIteration?: (
+    node: RepeatNode,
+    iteration: number,
+    total: number
+  ) => void;
 }
 
 export function* createSpellVM(
@@ -20,6 +32,8 @@ export function* createSpellVM(
 
   const maxSteps = resolvedOptions.maxSteps ?? 150;
   const getState = resolvedOptions.getState;
+  const onConditionEvaluated = resolvedOptions.onConditionEvaluated;
+  const onLoopIteration = resolvedOptions.onLoopIteration;
 
   let stepCounter = 0;
 
@@ -41,14 +55,24 @@ export function* createSpellVM(
       } else if (node.type === "REPEAT") {
         const loopCount = Math.min(Math.max(1, node.count), 20);
         for (let i = 0; i < loopCount; i++) {
+          if (onLoopIteration) {
+            onLoopIteration(node, i + 1, loopCount);
+          }
           yield* executeNodes(node.body);
         }
       } else if (node.type === "IF") {
-        // Evaluasi kondisi percabangan jika provider state tersedia
         const currentState = getState ? getState() : undefined;
         const conditionMet = currentState
           ? evaluateCondition(node.condition, currentState)
           : false;
+
+        if (onConditionEvaluated) {
+          onConditionEvaluated(
+            node,
+            conditionMet,
+            conditionMet ? "THEN" : "ELSE"
+          );
+        }
 
         if (conditionMet) {
           yield* executeNodes(node.thenBody);

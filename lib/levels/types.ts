@@ -21,11 +21,12 @@ export interface LevelDefinition {
   worldTitle: string;
   title: string;
   description: string;
-  conceptTag: "Sequencing" | "Loops" | "Pattern Recognition";
+  conceptTag: "Sequencing" | "Loops" | "Pattern Recognition" | "Conditionals";
   grid: LevelGridConfig;
   objectives?: Objective[];
   allowedRunes: CommandType[];
   allowRepeatRune?: boolean;
+  allowConditionRune?: boolean;
   parSteps: number;
   baseXp: number;
   hint: string;

@@ -4,7 +4,7 @@ export interface TestLevelFixture {
   id: string;
   title: string;
   description: string;
-  conceptTag: "Sequencing" | "Loops" | "Conditions";
+  conceptTag: "Sequencing" | "Loops" | "Conditions" | "Conditionals";
   grid: {
     width: number;
     height: number;
@@ -20,6 +20,8 @@ export interface TestLevelFixture {
   };
   objectives: Objective[];
   allowedRunes: CommandType[];
+  allowRepeatRune?: boolean;
+  allowConditionRune?: boolean;
   parSteps: number;
   hint: string;
 }
@@ -244,3 +246,70 @@ export const fixtureObstacleDetour: TestLevelFixture = {
   parSteps: 7,
   hint: "Belok ke utara (y=0) untuk memutari barisan batu.",
 };
+
+/**
+ * Fixture 7: Perulangan Terbatas (Bounded Loop)
+ * Arena 5x3. Pemain di (0, 1) menghadap RIGHT, portal di (4, 1).
+ * Solusi optimal: REPEAT count 4 [ STEP_FORWARD ].
+ */
+export const fixtureRepeatLoop: TestLevelFixture = {
+  id: "fix-repeat-loop",
+  title: "Langkah Berulang di Gua Kristal",
+  description: "Gunakan blok perulangan agar mantra maju dapat dijalankan berulang kali secara efisien.",
+  conceptTag: "Loops",
+  grid: {
+    width: 5,
+    height: 3,
+    playerStart: { x: 0, y: 1, direction: "RIGHT" },
+    obstacles: [],
+    shards: [],
+    torches: [],
+    portal: { x: 4, y: 1 },
+  },
+  objectives: [
+    {
+      id: "obj-portal",
+      type: "REACH_PORTAL",
+      description: "Capai portal di petak (4, 1) menggunakan perulangan",
+      isCompleted: false,
+    },
+  ],
+  allowedRunes: ["STEP_FORWARD"],
+  allowRepeatRune: true,
+  parSteps: 1,
+  hint: "Gunakan blok Ulangi 4 kali dengan aksi Maju di dalamnya.",
+};
+
+/**
+ * Fixture 8: Percabangan Kondisional (Conditional Branch)
+ * Arena 4x3. Pemain di (0, 1) menghadap RIGHT. Terdapat rintangan di (1, 1).
+ * Jika ada rintangan di depan, putar ke kiri (utara), lalu maju.
+ */
+export const fixtureConditionalBranch: TestLevelFixture = {
+  id: "fix-conditional-branch",
+  title: "Deteksi Rintangan Gaib",
+  description: "Gunakan mantra IF untuk mengecek apakah jalan di depan terhalang sebelum melangkah.",
+  conceptTag: "Conditionals",
+  grid: {
+    width: 4,
+    height: 3,
+    playerStart: { x: 0, y: 1, direction: "RIGHT" },
+    obstacles: [{ x: 1, y: 1 }],
+    shards: [],
+    torches: [],
+    portal: { x: 0, y: 0 },
+  },
+  objectives: [
+    {
+      id: "obj-portal",
+      type: "REACH_PORTAL",
+      description: "Deteksi rintangan dan putar arah menuju portal di petak (0, 0)",
+      isCompleted: false,
+    },
+  ],
+  allowedRunes: ["STEP_FORWARD", "TURN_LEFT"],
+  allowConditionRune: true,
+  parSteps: 2,
+  hint: "Periksa apakah ada rintangan di depan: jika ya, putar kiri lalu maju 1 langkah.",
+};
+

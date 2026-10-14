@@ -188,6 +188,34 @@ export class ExecutionController {
       this.vm = createSpellVM(this.currentProgram, {
         maxSteps: this.maxSteps,
         getState: () => this.currentWorldState,
+        onConditionEvaluated: (node, result) => {
+          this.events.push({
+            type: "CONDITION_EVALUATED",
+            stepNumber: this.stepsTaken,
+            nodeId: node.id,
+            condition: node.condition,
+            conditionResult: result,
+            branchChosen: result ? "THEN" : (node.elseBody && node.elseBody.length > 0 ? "ELSE" : "SKIP"),
+            message: result
+              ? `Kondisi '${node.condition}' terpenuhi: mengeksekusi cabang aksi.`
+              : `Kondisi '${node.condition}' tidak terpenuhi: ${node.elseBody?.length ? "menjalankan cabang lainnya." : "melewati blok."}`,
+            playerState: { ...this.currentWorldState.player },
+            metadata: {
+              actionSuccess: result,
+            },
+          });
+        },
+        onLoopIteration: (node, iteration, total) => {
+          this.events.push({
+            type: "LOOP_ITERATION",
+            stepNumber: this.stepsTaken,
+            nodeId: node.id,
+            iteration,
+            totalIterations: total,
+            message: `Putaran loop ke-${iteration} dari ${total}`,
+            playerState: { ...this.currentWorldState.player },
+          });
+        },
       });
       this.status = "RUNNING";
     }
@@ -461,4 +489,11 @@ export class ExecutionController {
       errorDetails: this.errorDetails,
     };
   }
+}
+
+export function createExecutionController(
+  config: ControllerConfig,
+  initialProgram?: SpellProgram
+): ExecutionController {
+  return new ExecutionController(config, initialProgram);
 }

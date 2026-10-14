@@ -157,15 +157,18 @@ Pengujian unit diimplementasikan menggunakan Vitest dengan konfigurasi native ES
  ✓ tests/engine/boundary_and_obstacles.test.ts (6 tests)
  ✓ tests/engine/objectives.test.ts (6 tests)
  ✓ tests/engine/instructions.test.ts (10 tests)
- ✓ tests/engine/conditions.test.ts (7 tests)
  ✓ tests/engine/loops_and_limits.test.ts (5 tests)
+ ✓ tests/engine/conditions.test.ts (7 tests)
  ✓ tests/engine/execution_order.test.ts (2 tests)
  ✓ tests/engine/step_run_reset.test.ts (4 tests)
  ✓ tests/engine/validation_and_replay.test.ts (6 tests)
+ ✓ tests/engine/stage3a_data_model.test.ts (19 tests)
+ ✓ tests/engine/controller.test.ts (11 tests)
+ ✓ tests/engine/stage3c_debug_vision.test.ts (10 tests)
 
- Test Files  8 passed (8)
-      Tests  46 passed (46)
-   Duration  567ms
+ Test Files  11 passed (11)
+      Tests  86 passed (86)
+   Duration  1.40s
 ```
 
 ### Rincian Cakupan Unit Test
@@ -202,7 +205,7 @@ Pengujian unit diimplementasikan menggunakan Vitest dengan konfigurasi native ES
    * Eksekusi perulangan bersarang (`nested REPEAT`) dalam batas kedalaman aman.
    * Proteksi infinite loop via `maxSteps` memicu error edukatif `MANA_OVERFLOW`.
    * Validasi batas count perulangan 1 sampai 20.
-   * Peringatan peringatan edukatif bila blok repeat kosong.
+   * Peringatan edukatif bila blok repeat kosong.
 
 6. **`conditions.test.ts` (7 tests)**:
    * Evaluasi predikat `IS_OBSTACLE_AHEAD` pada rintangan dan tepi arena.
@@ -228,3 +231,41 @@ Pengujian unit diimplementasikan menggunakan Vitest dengan konfigurasi native ES
    * Penolakan program yang melebihi batas maksimal balok mantra.
    * Penolakan struktur bersarang yang melebihi batas maksimal nesting depth.
    * Jaminan deterministic replay: 5 kali eksekusi menghasilkan event trace dan state yang 100% identik.
+
+9. **`stage3a_data_model.test.ts` (19 tests)**:
+   * Pengujian komprehensif data model arena, karakter, portal, shard, torch, dan objek aksi.
+   * Pemodelan error terstruktur, batas pergerakan, dan konsistensi status.
+
+10. **`controller.test.ts` (11 tests)**:
+    * Lifecycle controller: IDLE, RUNNING, COMPLETED, FAILED.
+    * Mode Step deterministik dengan pembaruan snapshot real-time.
+    * Eksekusi asinkronus Run dengan timer delay bertahap.
+    * Pencegahan eksekusi ganda paralel (`DOUBLE_RUN_PREVENTED`).
+    * Penanganan mutasi program di tengah jalan (safe abort & auto-reset).
+    * Mekanisme langganan observer (subscribe / notify) untuk decoupling React.
+
+11. **`stage3c_debug_vision.test.ts` (10 tests)**:
+    * Pelacakan perulangan terbatas (Bounded Loops) dan emisi event `LOOP_ITERATION` (`iteration`, `totalIterations`).
+    * Evaluasi percabangan kondisional (IF/ELSE) dan emisi event `CONDITION_EVALUATED` (`condition`, `conditionResult`, `branchChosen`).
+    * Penegakan batas kedalaman blok bersarang (maksimal 4 tingkat).
+    * Debug Vision: penandaan instruksi penyebab kegagalan (`OBSTACLE_HIT`, `nodeId`, `stepNumber`).
+    * Evaluasi objektif yang jujur ketika program selesai tanpa mencapai kemenangan (`isVictory: false`, rincian objektif belum terpenuhi).
+    * Trace snapshot pada `ExecutionController` untuk kebutuhan debugging visual UI.
+
+---
+
+## 6. Fitur Debug Vision & Panduan Pemain
+
+Debug Vision dirancang khusus agar anak-anak memahami penyebab kesalahan program mereka tanpa merasa frustrasi:
+
+1. **Sorot Blok Eksekusi Aktif**:
+   Balok instruksi yang sedang dijalankan pada Meja Mantra disorot secara dinamis dengan ring emas atau cyan terang, baik balok tingkat atas maupun sub-aksi di dalam `REPEAT` atau `IF`.
+2. **Penandaan Misfire Presisi**:
+   Jika terjadi tabrakan atau kesalahan eksekusi, balok penyebab kesalahan (`misfireNodeId`) berkedip merah terang dan nomor langkah (`stepNumber`) dicatat.
+3. **Penjelasan Kesalahan Sederhana (Pyx Companion)**:
+   Kesalahan dijelaskan dengan analogi fantasi ramah anak (contoh: "Terhalang semak berduri atau batu besar!") bukan pesan error teknis JavaScript mentah.
+4. **Hint Tanpa Membocorkan Jawaban Langsung**:
+   Tombol "Butuh Petunjuk?" memungkinkan anak membuka petunjuk bertahap dari Pyx si Kucing Api tanpa secara otomatis merusak tantangan eksplorasi.
+5. **Aksi Cepat Pengulangan & Penelusuran**:
+   Saat program gagal, tombol "Ulangi Misi (Reset)" dan "Telusuri Langkah (Step)" langsung tersedia di panel panduan Pyx agar anak dapat segera menganalisis mantranya langkah demi langkah.
+

@@ -2,22 +2,26 @@
 
 import React from "react";
 import { CommandType } from "@/lib/engine/types";
-import { ArrowUp, RotateCcw, RotateCw, Flame, Diamond, Repeat, Sparkles } from "lucide-react";
+import { ArrowUp, RotateCcw, RotateCw, Flame, Diamond, Repeat, Sparkles, HelpCircle } from "lucide-react";
 import { soundManager } from "@/lib/audio/soundManager";
 
 interface BlockTrayProps {
   allowedRunes: CommandType[];
   allowRepeat?: boolean;
+  allowCondition?: boolean;
   onAddAction: (command: CommandType) => void;
   onAddRepeat: () => void;
+  onAddCondition?: () => void;
   disabled?: boolean;
 }
 
 export function BlockTray({
   allowedRunes,
   allowRepeat = false,
+  allowCondition = false,
   onAddAction,
   onAddRepeat,
+  onAddCondition,
   disabled = false,
 }: BlockTrayProps) {
   const runeConfigs: Record<
@@ -124,6 +128,24 @@ export function BlockTray({
               <Repeat className="w-4 h-4 shrink-0" />
             </div>
             <span className="truncate">Ulangi (Loop)</span>
+          </button>
+        )}
+
+        {allowCondition && onAddCondition && (
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => {
+              if (disabled) return;
+              soundManager.playClick();
+              onAddCondition();
+            }}
+            className="flex items-center gap-2 px-3.5 py-3 rounded-rune border font-bold text-xs sm:text-sm text-left transition-all active:translate-y-1 select-none disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 bg-cyan-700 hover:bg-cyan-600 text-white border-cyan-400 shadow-[0_4px_0_#0E7490]"
+          >
+            <div className="p-1 rounded-md bg-black/20 flex items-center justify-center">
+              <HelpCircle className="w-4 h-4 shrink-0 text-cyan-200" />
+            </div>
+            <span className="truncate">Jika (Kondisi)</span>
           </button>
         )}
       </div>

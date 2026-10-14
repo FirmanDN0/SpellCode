@@ -331,6 +331,8 @@ export function SpellDeck({
                         const info = getCommandInfo(subAction.command);
                         const Icon = info.icon;
 
+                        const isSubMisfire = misfireNodeId === subNode.id;
+
                         return (
                           <div
                             key={subNode.id}
@@ -339,6 +341,8 @@ export function SpellDeck({
                             } ${
                               isSubActive
                                 ? "ring-2 ring-spell-gold-400 shadow-glow-gold scale-[1.02]"
+                                : isSubMisfire
+                                ? "ring-2 ring-spell-coral-400 bg-spell-coral-950/80 border-spell-coral-500 animate-pulse"
                                 : ""
                             }`}
                           >
@@ -460,23 +464,63 @@ export function SpellDeck({
                     {ifNode.thenBody.length === 0 ? (
                       <p className="text-xs text-cyan-300/60 italic py-1">Belum ada aksi</p>
                     ) : (
-                      ifNode.thenBody.map((subNode: AstNode) => {
+                      ifNode.thenBody.map((subNode: AstNode, subIdx: number) => {
                         if (subNode.type !== "ACTION") return null;
                         const subAction = subNode as ActionNode;
                         const info = getCommandInfo(subAction.command);
                         const Icon = info.icon;
+                        const isSubActive = activeNodeId === subNode.id;
+                        const isSubMisfire = misfireNodeId === subNode.id;
+
                         return (
                           <div
                             key={subNode.id}
-                            className={`flex items-center justify-between px-2.5 py-1.5 rounded-md border text-xs font-bold ${info.bg}`}
+                            className={`flex items-center justify-between px-2.5 py-1.5 rounded-md border text-xs font-bold transition-all ${
+                              info.bg
+                            } ${
+                              isSubActive
+                                ? "ring-2 ring-cyan-400 shadow-glow-cyan scale-[1.02]"
+                                : isSubMisfire
+                                ? "ring-2 ring-spell-coral-400 bg-spell-coral-950/80 border-spell-coral-500 animate-pulse"
+                                : ""
+                            }`}
                           >
                             <div className="flex items-center gap-2">
                               <Icon className="w-3.5 h-3.5 text-spell-gold-300" />
                               <span className="text-white">{info.label}</span>
                             </div>
+
+                            {onRemoveSubAction && (
+                              <button
+                                type="button"
+                                disabled={disabled}
+                                onClick={() => onRemoveSubAction(node.id, subIdx)}
+                                className="text-spell-purple-400 hover:text-spell-coral-400"
+                                aria-label={`Hapus aksi syarat ${subIdx + 1}`}
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            )}
                           </div>
                         );
                       })
+                    )}
+
+                    {/* Quick Add Sub Action ke Blok If */}
+                    {onAddSubAction && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {allowedRunes.map((cmd) => (
+                          <button
+                            key={cmd}
+                            type="button"
+                            disabled={disabled}
+                            onClick={() => onAddSubAction(node.id, cmd)}
+                            className="px-2 py-1 rounded bg-cyan-900/80 hover:bg-cyan-800 text-[11px] font-semibold text-cyan-200 border border-cyan-700/60 transition-colors disabled:opacity-40"
+                          >
+                            + {cmd === "STEP_FORWARD" ? "Maju" : cmd === "TURN_LEFT" ? "Kiri" : cmd === "TURN_RIGHT" ? "Kanan" : cmd}
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>

@@ -186,6 +186,9 @@ export interface ExecutionEvent {
   command?: CommandType;
   condition?: ConditionType;
   conditionResult?: boolean;
+  branchChosen?: "THEN" | "ELSE" | "SKIP";
+  iteration?: number;
+  totalIterations?: number;
   message?: string;
   playerState: PlayerState;
   metadata?: ExecutionEventMetadata;

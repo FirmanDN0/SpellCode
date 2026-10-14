@@ -9,7 +9,9 @@ import {
   ActionNode,
   AstNode,
   CommandType,
+  ConditionType,
   ExecutionStep,
+  IfNode,
   LevelGridState,
   RepeatNode,
   SpellProgram,
@@ -18,6 +20,7 @@ import {
   createActionNode,
   createEmptyProgram,
   createRepeatNode,
+  createIfNode,
 } from "@/lib/engine/ast";
 import { EvaluationResult } from "@/lib/engine/evaluator";
 import { useExecutionController } from "@/lib/engine/useExecutionController";
@@ -134,6 +137,14 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
     });
   };
 
+  const handleAddCondition = (condition: ConditionType = "IS_OBSTACLE_AHEAD") => {
+    const newIf = createIfNode(condition, []);
+    updateProgram({
+      ...program,
+      nodes: [...program.nodes, newIf],
+    });
+  };
+
   const handleRemoveNode = (nodeId: string) => {
     updateProgram({
       ...program,
@@ -171,25 +182,36 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
     updateProgram({ ...program, nodes: updatedNodes });
   };
 
-  const handleAddSubAction = (repeatId: string, command: CommandType) => {
+  const handleAddSubAction = (parentId: string, command: CommandType) => {
     const updatedNodes = program.nodes.map((node) => {
-      if (node.id === repeatId && node.type === "REPEAT") {
+      if (node.id === parentId && node.type === "REPEAT") {
         const repeatNode = node as RepeatNode;
         const subNode = createActionNode(command);
         return { ...repeatNode, body: [...repeatNode.body, subNode] };
+      }
+      if (node.id === parentId && node.type === "IF") {
+        const ifNode = node as IfNode;
+        const subNode = createActionNode(command);
+        return { ...ifNode, thenBody: [...ifNode.thenBody, subNode] };
       }
       return node;
     });
     updateProgram({ ...program, nodes: updatedNodes });
   };
 
-  const handleRemoveSubAction = (repeatId: string, subIndex: number) => {
+  const handleRemoveSubAction = (parentId: string, subIndex: number) => {
     const updatedNodes = program.nodes.map((node) => {
-      if (node.id === repeatId && node.type === "REPEAT") {
+      if (node.id === parentId && node.type === "REPEAT") {
         const repeatNode = node as RepeatNode;
         const newBody = [...repeatNode.body];
         newBody.splice(subIndex, 1);
         return { ...repeatNode, body: newBody };
+      }
+      if (node.id === parentId && node.type === "IF") {
+        const ifNode = node as IfNode;
+        const newBody = [...ifNode.thenBody];
+        newBody.splice(subIndex, 1);
+        return { ...ifNode, thenBody: newBody };
       }
       return node;
     });
@@ -368,6 +390,10 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
                   ? "victory"
                   : "info"
               }
+              stepNumber={snapshot.stepsTaken}
+              conditionFailed={
+                snapshot.evaluation?.objectives?.find((o) => !o.isCompleted)?.description
+              }
               onReset={handleReset}
               onStepDebug={handleStep}
             />
@@ -395,8 +421,10 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
             <BlockTray
               allowedRunes={level.allowedRunes}
               allowRepeat={level.allowRepeatRune}
+              allowCondition={level.allowConditionRune}
               onAddAction={handleAddAction}
               onAddRepeat={handleAddRepeat}
+              onAddCondition={handleAddCondition}
               disabled={isRunning}
             />
 

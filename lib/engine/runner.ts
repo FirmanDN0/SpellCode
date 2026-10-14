@@ -42,6 +42,34 @@ export function runSpellProgram(
     const vm = createSpellVM(program, {
       maxSteps,
       getState: () => currentState,
+      onConditionEvaluated: (node, result) => {
+        events.push({
+          type: "CONDITION_EVALUATED",
+          stepNumber: stepsTaken,
+          nodeId: node.id,
+          condition: node.condition,
+          conditionResult: result,
+          branchChosen: result ? "THEN" : (node.elseBody && node.elseBody.length > 0 ? "ELSE" : "SKIP"),
+          message: result
+            ? `Kondisi '${node.condition}' terpenuhi: menjalankan cabang aksi.`
+            : `Kondisi '${node.condition}' tidak terpenuhi: ${node.elseBody?.length ? "menjalankan cabang lainnya." : "melewati blok."}`,
+          playerState: { ...currentState.player },
+          metadata: {
+            actionSuccess: result,
+          },
+        });
+      },
+      onLoopIteration: (node, iteration, total) => {
+        events.push({
+          type: "LOOP_ITERATION",
+          stepNumber: stepsTaken,
+          nodeId: node.id,
+          iteration,
+          totalIterations: total,
+          message: `Putaran loop ke-${iteration} dari ${total}`,
+          playerState: { ...currentState.player },
+        });
+      },
     });
 
     for (const step of vm) {

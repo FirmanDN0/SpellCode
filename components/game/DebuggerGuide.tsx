@@ -11,6 +11,8 @@ interface DebuggerGuideProps {
   onShowHint?: () => void;
   onReset?: () => void;
   onStepDebug?: () => void;
+  stepNumber?: number;
+  conditionFailed?: string;
 }
 
 export function DebuggerGuide({
@@ -20,6 +22,8 @@ export function DebuggerGuide({
   onShowHint,
   onReset,
   onStepDebug,
+  stepNumber,
+  conditionFailed,
 }: DebuggerGuideProps) {
   const [showHintModal, setShowHintModal] = useState(false);
 
@@ -114,6 +118,11 @@ export function DebuggerGuide({
             <span className="text-xs font-black text-spell-gold-300 flex items-center gap-1.5 uppercase tracking-wider">
               <Icon className={`w-3.5 h-3.5 ${iconInfo.color}`} />
               <span>{iconInfo.title}</span>
+              {isMisfire && stepNumber !== undefined && stepNumber > 0 && (
+                <span className="ml-1.5 px-2 py-0.5 rounded-full bg-spell-coral-950/80 border border-spell-coral-500/50 text-[10px] font-mono font-bold text-spell-coral-300">
+                  Langkah {stepNumber}
+                </span>
+              )}
             </span>
 
             {hintText && (
@@ -139,13 +148,51 @@ export function DebuggerGuide({
             {message}
           </p>
 
+          {/* Banner Kondisi Gagal jika ada */}
+          {isMisfire && conditionFailed && (
+            <div className="mt-1.5 p-2 rounded-lg bg-spell-coral-950/60 border border-spell-coral-500/40 text-[11px] text-spell-coral-200 leading-snug">
+              <strong>Kondisi yang belum terpenuhi: </strong>
+              <span>{conditionFailed}</span>
+            </div>
+          )}
+
           {/* Tips Tambahan Khusus Misfire Error */}
           {isMisfire && (
-            <div className="mt-2.5 p-2 rounded-lg bg-black/40 border border-spell-coral-500/30 text-[11px] text-spell-coral-300 leading-snug">
+            <div className="mt-2 p-2 rounded-lg bg-black/40 border border-spell-coral-500/30 text-[11px] text-spell-coral-300 leading-snug">
               <strong>💡 Pyx Berbisik: </strong>
               <span>
                 Periksa balok yang berkedip merah di Meja Mantra. Kamu bisa menekan tombol <strong>Langkah</strong> untuk melacak gerakan penyihir satu per satu!
               </span>
+            </div>
+          )}
+
+          {/* Tombol Aksi Debug & Reset Cepat */}
+          {isMisfire && (onReset || onStepDebug) && (
+            <div className="flex flex-wrap items-center gap-2 mt-2.5 pt-2 border-t border-spell-coral-500/30">
+              {onReset && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={onReset}
+                  className="text-xs h-7 px-2.5 flex items-center gap-1.5 bg-spell-purple-850 hover:bg-spell-purple-700 text-spell-coral-200 border border-spell-coral-500/40"
+                >
+                  <RotateCcw className="w-3 h-3 text-spell-coral-400" />
+                  <span>Ulangi Misi (Reset)</span>
+                </Button>
+              )}
+              {onStepDebug && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={onStepDebug}
+                  className="text-xs h-7 px-2.5 flex items-center gap-1.5 bg-spell-teal-950/60 hover:bg-spell-teal-900 text-spell-teal-200 border border-spell-teal-500/40"
+                >
+                  <Sparkles className="w-3 h-3 text-spell-gold-300" />
+                  <span>Telusuri Langkah (Step)</span>
+                </Button>
+              )}
             </div>
           )}
         </div>
