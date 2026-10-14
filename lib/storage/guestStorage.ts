@@ -58,15 +58,43 @@ export const defaultInitialGuestData: GuestData = {
   achievements: ["welcome_apprentice"],
 };
 
-export function getGuestData(): GuestData {
-  if (typeof window === "undefined") {
-    return defaultInitialGuestData;
-  }
+let memoryStorage: Record<string, string> = {};
 
+export function resetStorageForTesting(): void {
+  memoryStorage = {};
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.clear();
+    } catch {}
+  }
+}
+
+function getStorageItem(key: string): string | null {
+  if (typeof window !== "undefined") {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return memoryStorage[key] || null;
+    }
+  }
+  return memoryStorage[key] || null;
+}
+
+function setStorageItem(key: string, value: string): void {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(key, value);
+      return;
+    } catch {}
+  }
+  memoryStorage[key] = value;
+}
+
+export function getGuestData(): GuestData {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = getStorageItem(STORAGE_KEY);
     if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultInitialGuestData));
+      setStorageItem(STORAGE_KEY, JSON.stringify(defaultInitialGuestData));
       return defaultInitialGuestData;
     }
     const parsed = JSON.parse(raw);
@@ -88,9 +116,8 @@ export function getGuestData(): GuestData {
 }
 
 export function saveGuestData(data: GuestData): void {
-  if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    setStorageItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {
     console.error("Gagal menyimpan ke LocalStorage:", e);
   }

@@ -29,6 +29,7 @@ import {
   saveDraftAst,
   saveLevelResult,
 } from "@/lib/storage/guestStorage";
+import { submitProgressWithRetry } from "@/lib/storage/syncService";
 import { soundManager } from "@/lib/audio/soundManager";
 import { ArenaGrid } from "@/components/game/ArenaGrid";
 import { SpellDeck } from "@/components/game/SpellDeck";
@@ -89,6 +90,12 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
   const [isVictoryModalOpen, setIsVictoryModalOpen] = useState<boolean>(false);
   const [evalResult, setEvalResult] = useState<EvaluationResult | null>(null);
   const [newRankNotice, setNewRankNotice] = useState<{ isNew: boolean; rank?: string }>({ isNew: false });
+  const [syncStatus, setSyncStatus] = useState<"idle" | "saving" | "saved" | "failed">("idle");
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [lastVictoryData, setLastVictoryData] = useState<{
+    evaluation: EvaluationResult;
+    finalSteps: number;
+  } | null>(null);
   const [mobileView, setMobileView] = useState<"all" | "arena" | "editor">("all");
 
   // Inisialisasi atau pulihkan draf susunan blok terakhir
@@ -230,34 +237,55 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
 
   const handleVictory = async (evaluation: EvaluationResult, finalSteps: number) => {
     soundManager.playVictory();
-    const saveRes = saveLevelResult(
-      level.id,
-      evaluation.stars,
-      finalSteps,
-      program,
-      evaluation.xpEarned
-    );
-    setNewRankNotice({ isNew: saveRes.isNewRank, rank: saveRes.newRank });
+    setEvalResult(evaluation);
+    setLastVictoryData({ evaluation, finalSteps });
+    setSyncStatus("saving");
+    setSyncError(null);
     setIsVictoryModalOpen(true);
 
-    // Kirim submission terverifikasi ke server Supabase secara asynchronous
-    try {
-      const res = await fetch("/api/progress/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          levelId: level.id,
-          program,
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.isNewRank && data.wizardRank) {
-          setNewRankNotice({ isNew: true, rank: data.wizardRank });
-        }
+    const { saveRes, serverResult, serverError } = await submitProgressWithRetry(
+      level.id,
+      program,
+      { stars: evaluation.stars, xpEarned: evaluation.xpEarned },
+      finalSteps
+    );
+
+    if (serverResult) {
+      setSyncStatus("saved");
+      if (serverResult.isNewRank && serverResult.wizardRank) {
+        setNewRankNotice({ isNew: true, rank: serverResult.wizardRank });
+      } else {
+        setNewRankNotice({ isNew: saveRes.isNewRank, rank: saveRes.newRank });
       }
-    } catch (err) {
-      console.warn("Server progress submission offline/dilewati:", err);
+    } else {
+      setSyncStatus("failed");
+      setSyncError(serverError || "Gagal menghubungi server awan.");
+      setNewRankNotice({ isNew: saveRes.isNewRank, rank: saveRes.newRank });
+    }
+  };
+
+  const handleRetrySync = async () => {
+    if (!lastVictoryData) return;
+    setSyncStatus("saving");
+    setSyncError(null);
+
+    const { saveRes, serverResult, serverError } = await submitProgressWithRetry(
+      level.id,
+      program,
+      { stars: lastVictoryData.evaluation.stars, xpEarned: lastVictoryData.evaluation.xpEarned },
+      lastVictoryData.finalSteps
+    );
+
+    if (serverResult) {
+      setSyncStatus("saved");
+      if (serverResult.isNewRank && serverResult.wizardRank) {
+        setNewRankNotice({ isNew: true, rank: serverResult.wizardRank });
+      } else {
+        setNewRankNotice({ isNew: saveRes.isNewRank, rank: saveRes.newRank });
+      }
+    } else {
+      setSyncStatus("failed");
+      setSyncError(serverError || "Gagal menghubungi server awan.");
     }
   };
 
@@ -362,22 +390,20 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
         <button
           type="button"
           onClick={() => setMobileView("all")}
-          className={`px-3 sm:px-4 py-2 min-h-[38px] rounded-lg text-xs font-bold transition-all ${
-            mobileView === "all"
+          className={`px-3 sm:px-4 py-2 min-h-[38px] rounded-lg text-xs font-bold transition-all ${mobileView === "all"
               ? "bg-spell-purple-700 text-white shadow-sm"
               : "text-spell-purple-300 hover:text-white"
-          }`}
+            }`}
         >
           Semua Tampilan
         </button>
         <button
           type="button"
           onClick={() => setMobileView("arena")}
-          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 min-h-[38px] rounded-lg text-xs font-bold transition-all ${
-            mobileView === "arena"
+          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 min-h-[38px] rounded-lg text-xs font-bold transition-all ${mobileView === "arena"
               ? "bg-spell-teal-700 text-white shadow-sm"
               : "text-spell-purple-300 hover:text-white"
-          }`}
+            }`}
         >
           <Compass className="w-3.5 h-3.5" />
           <span>Arena Saja</span>
@@ -385,11 +411,10 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
         <button
           type="button"
           onClick={() => setMobileView("editor")}
-          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 min-h-[38px] rounded-lg text-xs font-bold transition-all ${
-            mobileView === "editor"
+          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 min-h-[38px] rounded-lg text-xs font-bold transition-all ${mobileView === "editor"
               ? "bg-spell-purple-700 text-white shadow-sm"
               : "text-spell-purple-300 hover:text-white"
-          }`}
+            }`}
         >
           <Code2 className="w-3.5 h-3.5" />
           <span>Editor Mantra</span>
@@ -410,8 +435,8 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
                 gridState.status === "FAILED"
                   ? "misfire"
                   : gridState.status === "VICTORY"
-                  ? "victory"
-                  : "info"
+                    ? "victory"
+                    : "info"
               }
               stepNumber={snapshot.stepsTaken}
               conditionFailed={
@@ -477,6 +502,9 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
         nextLevelId={nextLevel?.id}
         isNewRank={newRankNotice.isNew}
         newRank={newRankNotice.rank}
+        syncState={syncStatus}
+        syncError={syncError}
+        onRetrySync={handleRetrySync}
         onRetry={handleReset}
         onClose={() => setIsVictoryModalOpen(false)}
       />

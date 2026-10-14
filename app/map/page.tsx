@@ -20,11 +20,14 @@ import {
   LevelNodeState,
   LevelStatus,
 } from "@/lib/storage/progressService";
+import { useUserSession } from "@/lib/supabase/useUserSession";
 import { Button, Badge, Card, Modal, ProgressBar } from "@/components/ui";
 
 export default function WorldMapPage() {
   const [selectedWorld, setSelectedWorld] = useState<1 | 2>(1);
   const [guestData, setGuestData] = useState<GuestData | null>(null);
+  const { user, profile, progress: onlineProgress, isLoading: isAuthLoading } = useUserSession();
+
   const [lockedModal, setLockedModal] = useState<{
     isOpen: boolean;
     title: string;
@@ -39,7 +42,36 @@ export default function WorldMapPage() {
     setGuestData(getGuestData());
   }, []);
 
-  const levelStates = getLevelNodeStates(selectedWorld, guestData);
+  // Gabungkan data online Supabase dengan data lokal
+  const effectiveData: GuestData = React.useMemo(() => {
+    const base = guestData || getGuestData();
+    if (!user) return base;
+
+    const mergedProgress = { ...base.progress };
+    for (const [lvlId, record] of Object.entries(onlineProgress)) {
+      mergedProgress[lvlId] = {
+        status: record.status as "unlocked" | "completed",
+        stars: record.stars,
+        bestStepCount: record.best_step_count ?? 0,
+        attemptsCount: record.attempts_count ?? 1,
+        firstCompletedAt: record.first_completed_at ?? undefined,
+      };
+    }
+
+    return {
+      ...base,
+      profile: {
+        ...base.profile,
+        displayName: profile?.display_name || base.profile.displayName,
+        avatarId: profile?.avatar_id || base.profile.avatarId,
+        totalXp: profile?.total_xp ?? base.profile.totalXp,
+        wizardRank: profile?.wizard_rank || base.profile.wizardRank,
+      },
+      progress: mergedProgress,
+    };
+  }, [guestData, user, profile, onlineProgress]);
+
+  const levelStates = getLevelNodeStates(selectedWorld, effectiveData);
 
   // Total bintang di World aktif
   const worldStars = levelStates.reduce((sum, item) => sum + item.stars, 0);
@@ -47,11 +79,11 @@ export default function WorldMapPage() {
   const completedWorldLevels = levelStates.filter((item) => item.status === "completed").length;
 
   // Cek apakah World 2 terbuka (butuh minimal 8 bintang di World 1)
-  const world1Stars = getLevelNodeStates(1, guestData).reduce(
+  const world1Stars = getLevelNodeStates(1, effectiveData).reduce(
     (sum, item) => sum + item.stars,
     0
   );
-  const isWorld2Unlocked = world1Stars >= 8 || Boolean(guestData?.progress["w2-l1"]);
+  const isWorld2Unlocked = world1Stars >= 8 || Boolean(effectiveData?.progress["w2-l1"]);
 
   const handleWorldSwitch = (worldNum: 1 | 2) => {
     if (worldNum === 2 && !isWorld2Unlocked) {
@@ -96,11 +128,10 @@ export default function WorldMapPage() {
           <button
             type="button"
             onClick={() => handleWorldSwitch(1)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-              selectedWorld === 1
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${selectedWorld === 1
                 ? "bg-spell-purple-700 text-white shadow-rune-purple border border-spell-purple-500/50"
                 : "text-spell-purple-300 hover:text-white"
-            }`}
+              }`}
           >
             <span>🌲 World 1: Hutan Peri</span>
           </button>
@@ -108,11 +139,10 @@ export default function WorldMapPage() {
           <button
             type="button"
             onClick={() => handleWorldSwitch(2)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-              selectedWorld === 2
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${selectedWorld === 2
                 ? "bg-spell-teal-700 text-white shadow-rune-teal border border-spell-teal-500/50"
                 : "text-spell-purple-300 hover:text-white"
-            }`}
+              }`}
           >
             <span>💎 World 2: Gua Kristal</span>
             {!isWorld2Unlocked && (
@@ -170,18 +200,32 @@ export default function WorldMapPage() {
         </div>
       </div>
 
-      {/* Pemberitahuan Transparansi Penyimpanan Lokal */}
-      <div className="mb-6 px-4 py-3 rounded-rune bg-spell-purple-950/60 border border-spell-purple-800/80 text-xs text-spell-purple-300 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-spell-teal-400 shrink-0" />
-          <span>
-            <strong>Mode Magang Tamu:</strong> Progres level disimpan di browser ini. Masuk dengan akun keluarga untuk sinkronisasi awan.
-          </span>
+      {/* Pemberitahuan Transparansi Penyimpanan Lokal / Awan */}
+      {user ? (
+        <div className="mb-6 px-4 py-3 rounded-rune bg-spell-purple-950/80 border border-spell-teal-600/50 text-xs text-spell-teal-200 flex items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-spell-teal-400 shrink-0" />
+            <span>
+              <strong>Grimoire Awan Terhubung:</strong> Masuk sebagai <span className="font-extrabold text-white">{profile?.display_name || user.email}</span> ({profile?.wizard_rank || "Novice Conjurer"}). Progres tersinkronisasi otomatis dengan aman.
+            </span>
+          </div>
+          <Link href="/profile" className="text-spell-gold-300 hover:text-white underline font-bold shrink-0">
+            Lihat Profil & Prestasi
+          </Link>
         </div>
-        <Link href="/login" className="text-spell-teal-300 hover:text-white underline font-bold shrink-0">
-          Masuk Akun
-        </Link>
-      </div>
+      ) : (
+        <div className="mb-6 px-4 py-3 rounded-rune bg-spell-purple-950/60 border border-spell-purple-800/80 text-xs text-spell-purple-300 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-spell-teal-400 shrink-0" />
+            <span>
+              <strong>Mode Magang Tamu:</strong> Progres level disimpan di browser ini. Masuk dengan akun keluarga untuk sinkronisasi awan.
+            </span>
+          </div>
+          <Link href="/login" className="text-spell-teal-300 hover:text-white underline font-bold shrink-0">
+            Masuk Akun
+          </Link>
+        </div>
+      )}
 
       {/* Grid Node Level */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 my-6">
@@ -295,20 +339,18 @@ export default function WorldMapPage() {
           return (
             <div
               key={level.id}
-              className={`relative p-5 rounded-card bg-gradient-to-b from-spell-purple-900 to-spell-purple-950 border-2 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 shadow-card-fantasy ${
-                isCompleted
+              className={`relative p-5 rounded-card bg-gradient-to-b from-spell-purple-900 to-spell-purple-950 border-2 flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 shadow-card-fantasy ${isCompleted
                   ? "border-spell-purple-700/80 hover:border-spell-gold-400/80"
                   : "border-spell-purple-700/80 hover:border-spell-teal-400"
-              }`}
+                }`}
             >
               <div>
                 <div className="flex items-start justify-between">
                   <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center font-mono font-black text-base shadow-sm ${
-                      isCompleted
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center font-mono font-black text-base shadow-sm ${isCompleted
                         ? "bg-spell-purple-800 text-spell-gold-300 border border-spell-purple-600"
                         : "bg-spell-purple-800 text-white border border-spell-purple-600"
-                    }`}
+                      }`}
                   >
                     {level.levelNumber}
                   </div>
@@ -318,11 +360,10 @@ export default function WorldMapPage() {
                       {[1, 2, 3].map((starIdx) => (
                         <Star
                           key={starIdx}
-                          className={`w-4 h-4 ${
-                            starIdx <= stars
+                          className={`w-4 h-4 ${starIdx <= stars
                               ? "fill-spell-gold-400 text-spell-gold-400"
                               : "fill-spell-purple-900 text-spell-purple-700"
-                          }`}
+                            }`}
                         />
                       ))}
                     </div>

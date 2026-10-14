@@ -2,7 +2,19 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
-import { Star, Zap, Award, ArrowRight, RotateCcw, Map } from "lucide-react";
+import {
+  Star,
+  Zap,
+  Award,
+  ArrowRight,
+  RotateCcw,
+  Map,
+  Cloud,
+  CloudOff,
+  RefreshCw,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
 import { soundManager } from "@/lib/audio/soundManager";
 import { Button } from "../ui/Button";
 
@@ -16,6 +28,9 @@ interface VictoryModalProps {
   nextLevelId?: string;
   isNewRank?: boolean;
   newRank?: string;
+  syncState?: "idle" | "saving" | "saved" | "failed";
+  syncError?: string | null;
+  onRetrySync?: () => void;
   onRetry: () => void;
   onClose: () => void;
 }
@@ -30,6 +45,9 @@ export function VictoryModal({
   nextLevelId,
   isNewRank = false,
   newRank,
+  syncState = "saved",
+  syncError = null,
+  onRetrySync,
   onRetry,
   onClose,
 }: VictoryModalProps) {
@@ -67,19 +85,17 @@ export function VictoryModal({
             return (
               <div
                 key={starIndex}
-                className={`relative transition-all duration-300 transform ${
-                  isEarned
+                className={`relative transition-all duration-300 transform ${isEarned
                     ? "scale-110 animate-bounce"
                     : "opacity-30 scale-90"
-                }`}
+                  }`}
                 style={{ animationDelay: `${starIndex * 150}ms` }}
               >
                 <Star
-                  className={`w-12 h-12 sm:w-14 sm:h-14 ${
-                    isEarned
+                  className={`w-12 h-12 sm:w-14 sm:h-14 ${isEarned
                       ? "text-spell-gold-400 fill-spell-gold-400 drop-shadow-[0_0_15px_rgba(251,191,36,0.6)]"
                       : "text-spell-purple-600 fill-spell-purple-800"
-                  }`}
+                    }`}
                 />
               </div>
             );
@@ -117,6 +133,41 @@ export function VictoryModal({
             </div>
           </div>
         </div>
+
+        {/* Status Sinkronisasi Supabase (Awan / Lokal) */}
+        {syncState === "saving" && (
+          <div className="w-full mb-3 p-2.5 rounded-xl bg-spell-purple-800/50 border border-spell-purple-700/60 flex items-center justify-center gap-2 text-xs text-spell-purple-200">
+            <Loader2 className="w-4 h-4 text-spell-teal-400 animate-spin" />
+            <span>Menyimpan ke Grimoire Awan...</span>
+          </div>
+        )}
+
+        {syncState === "saved" && (
+          <div className="w-full mb-3 p-2 rounded-xl bg-spell-emerald-950/40 border border-spell-emerald-600/30 flex items-center justify-center gap-2 text-xs text-spell-emerald-300">
+            <CheckCircle2 className="w-3.5 h-3.5 text-spell-emerald-400 shrink-0" />
+            <span>Tersimpan aman di Grimoire Awan dan Lokal</span>
+          </div>
+        )}
+
+        {syncState === "failed" && (
+          <div className="w-full mb-3 p-2.5 rounded-xl bg-spell-coral-950/40 border border-spell-coral-600/40 flex flex-col items-center gap-1.5 text-xs text-spell-coral-200">
+            <div className="flex items-center gap-1.5 text-spell-coral-300 font-semibold">
+              <CloudOff className="w-4 h-4 text-spell-coral-400 shrink-0" />
+              <span>Sinkronisasi Awan Tertunda (Tersimpan Lokal)</span>
+            </div>
+            {syncError && <span className="text-[11px] text-spell-coral-400/80">{syncError}</span>}
+            {onRetrySync && (
+              <button
+                type="button"
+                onClick={onRetrySync}
+                className="mt-1 px-3 py-1 rounded-lg bg-spell-coral-500/20 hover:bg-spell-coral-500/30 text-spell-coral-300 text-xs font-bold flex items-center gap-1 transition-colors"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Coba Simpan ke Awan Lagi</span>
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Tombol Tindakan */}
         <div className="flex flex-col gap-2.5 w-full mt-2">
