@@ -226,6 +226,7 @@ export interface EvaluationResult {
   stars: number;
   xpEarned: number;
   message: string;
+  instructionCount?: number;
 }
 
 export interface ExecutionResult {

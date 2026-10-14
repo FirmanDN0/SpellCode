@@ -5,7 +5,8 @@ export function evaluateLevelState(
   state: LevelGridState,
   parSteps: number,
   stepsTaken: number,
-  customObjectives?: Objective[]
+  customObjectives?: Objective[],
+  instructionCount?: number
 ): EvaluationResult {
   const allShardsCollected =
     state.shards.length === 0 ||
@@ -26,11 +27,18 @@ export function evaluateLevelState(
   let message = "";
 
   if (isVictory) {
-    if (stepsTaken <= parSteps) {
+    // Pada level pemrograman dengan konsep Loop/Condition, efisiensi diukur dari
+    // ringkasnya balok instruksi di Meja Mantra (instructionCount) atau langkah fisik (stepsTaken).
+    const effectiveMetric =
+      instructionCount !== undefined
+        ? Math.min(instructionCount, stepsTaken)
+        : stepsTaken;
+
+    if (effectiveMetric <= parSteps || stepsTaken <= parSteps) {
       stars = 3;
       xpEarned = 100;
       message = "Luar biasa! Mantramu sangat efisien dan sempurna!";
-    } else if (stepsTaken <= parSteps + 2) {
+    } else if (effectiveMetric <= parSteps + 2 || stepsTaken <= parSteps + 2) {
       stars = 2;
       xpEarned = 75;
       message = "Kerja bagus! Sedikit lagi menuju mantra paling ringkas.";
@@ -113,5 +121,6 @@ export function evaluateLevelState(
     stars,
     xpEarned,
     message,
+    instructionCount,
   };
 }

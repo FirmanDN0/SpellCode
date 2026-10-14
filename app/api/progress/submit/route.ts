@@ -13,20 +13,48 @@ interface SubmissionPayload {
 
 export async function POST(req: NextRequest) {
   try {
-    const body: SubmissionPayload = await req.json();
-    const { levelId, program } = body;
-
-    // 1. Validasi input dasar
-    if (!levelId || typeof levelId !== "string") {
+    let body: SubmissionPayload;
+    try {
+      body = await req.json();
+    } catch {
       return NextResponse.json(
-        { error: "Parameter levelId tidak valid." },
+        { error: "Format payload JSON tidak valid." },
         { status: 400 }
       );
     }
 
-    if (!program || !Array.isArray(program.nodes)) {
+    const { levelId, program, idempotencyKey } = body;
+
+    // 1. Validasi input dasar dan pencegahan payload injection
+    if (
+      !levelId ||
+      typeof levelId !== "string" ||
+      levelId.length > 50 ||
+      !/^[a-zA-Z0-9_-]+$/.test(levelId)
+    ) {
       return NextResponse.json(
-        { error: "Struktur program mantra AST tidak valid." },
+        { error: "Parameter levelId tidak valid atau melebihi batas panjang." },
+        { status: 400 }
+      );
+    }
+
+    if (
+      !program ||
+      !Array.isArray(program.nodes) ||
+      program.nodes.length > 100
+    ) {
+      return NextResponse.json(
+        { error: "Struktur program mantra AST tidak valid atau melebihi batas 100 instruksi." },
+        { status: 400 }
+      );
+    }
+
+    if (
+      idempotencyKey !== undefined &&
+      (typeof idempotencyKey !== "string" || idempotencyKey.length > 100)
+    ) {
+      return NextResponse.json(
+        { error: "Parameter idempotencyKey tidak valid atau melebihi batas panjang." },
         { status: 400 }
       );
     }

@@ -132,5 +132,13 @@ describe("Tahap 4B: Authentication and Session Management Verification", () => {
       expect(middlewareContent).toContain("supabase.auth.getUser()");
       expect(middlewareContent).toContain("redirectUrl.pathname = \"/login\"");
     });
+
+    it("memastikan navbar merespons session pengguna (menampilkan nama akun, bukan Profil Magang saat login)", () => {
+      const navbarPath = path.resolve(process.cwd(), "components/shared/Navbar.tsx");
+      const navbarContent = fs.readFileSync(navbarPath, "utf-8");
+      expect(navbarContent).toContain("useUserSession");
+      expect(navbarContent).toContain("isOnline");
+      expect(navbarContent).toContain("profileLabel");
+    });
   });
 });

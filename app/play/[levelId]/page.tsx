@@ -331,6 +331,8 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
   };
 
   const handleReset = () => {
+    setIsVictoryModalOpen(false);
+    setEvalResult(null);
     controllerReset();
   };
 
@@ -497,6 +499,7 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
         stars={evalResult?.stars || 1}
         stepsTaken={stepsTaken}
         parSteps={level.parSteps}
+        instructionCount={evalResult?.instructionCount ?? program.nodes.length}
         xpEarned={evalResult?.xpEarned || 50}
         message={evalResult?.message || "Misi selesai!"}
         nextLevelId={nextLevel?.id}

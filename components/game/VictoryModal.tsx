@@ -23,6 +23,7 @@ interface VictoryModalProps {
   stars: number;
   stepsTaken: number;
   parSteps: number;
+  instructionCount?: number;
   xpEarned: number;
   message: string;
   nextLevelId?: string;
@@ -40,6 +41,7 @@ export function VictoryModal({
   stars,
   stepsTaken,
   parSteps,
+  instructionCount,
   xpEarned,
   message,
   nextLevelId,
@@ -116,12 +118,21 @@ export function VictoryModal({
           </div>
         )}
 
-        {/* Statistik Langkah & Perolehan XP */}
+        {/* Statistik Langkah / Blok & Perolehan XP */}
         <div className="grid grid-cols-2 gap-3 w-full my-4">
           <div className="p-3 rounded-rune bg-spell-purple-800/60 border border-spell-purple-700 flex flex-col items-center">
-            <span className="text-xs text-spell-purple-300 font-semibold">Efisiensi Langkah</span>
+            <span className="text-xs text-spell-purple-300 font-semibold">
+              {instructionCount !== undefined && instructionCount <= parSteps
+                ? "Efisiensi Blok Mantra"
+                : "Efisiensi Langkah"}
+            </span>
             <div className="text-lg font-black text-white font-mono mt-0.5">
-              {stepsTaken} <span className="text-xs text-spell-purple-400 font-normal">/ Par {parSteps}</span>
+              {instructionCount !== undefined && instructionCount <= parSteps
+                ? instructionCount
+                : stepsTaken}{" "}
+              <span className="text-xs text-spell-purple-400 font-normal">
+                / Par {parSteps}
+              </span>
             </div>
           </div>
 
@@ -172,14 +183,14 @@ export function VictoryModal({
         {/* Tombol Tindakan */}
         <div className="flex flex-col gap-2.5 w-full mt-2">
           {nextLevelId ? (
-            <Link href={`/play/${nextLevelId}`} className="w-full">
+            <Link href={`/play/${nextLevelId}`} className="w-full" onClick={onClose}>
               <Button variant="primary" size="lg" className="w-full font-extrabold text-base">
                 <span>Lanjut ke Level Berikutnya</span>
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
           ) : (
-            <Link href="/map" className="w-full">
+            <Link href="/map" className="w-full" onClick={onClose}>
               <Button variant="primary" size="lg" className="w-full font-extrabold text-base">
                 <span>Selesai! Kembali ke Peta</span>
                 <Map className="w-5 h-5" />
@@ -191,14 +202,17 @@ export function VictoryModal({
             <Button
               variant="secondary"
               size="md"
-              onClick={onRetry}
+              onClick={() => {
+                onRetry();
+                onClose();
+              }}
               className="text-sm font-bold"
             >
               <RotateCcw className="w-4 h-4" />
               <span>Ulangi Level</span>
             </Button>
 
-            <Link href="/map" className="w-full">
+            <Link href="/map" className="w-full" onClick={onClose}>
               <Button
                 variant="ghost"
                 size="md"

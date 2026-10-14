@@ -319,11 +319,13 @@ export class ExecutionController {
   }
 
   private finalizeExecution() {
+    const instructionCount = this.currentProgram.nodes.length;
     this.evaluation = evaluateLevelState(
       this.currentWorldState,
       this.parSteps,
       this.stepsTaken,
-      this.objectives
+      this.objectives,
+      instructionCount
     );
 
     if (this.evaluation.isVictory) {

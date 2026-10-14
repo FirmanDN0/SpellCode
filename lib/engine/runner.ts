@@ -130,7 +130,14 @@ export function runSpellProgram(
   }
 
   // Evaluasi Objective Level
-  const evaluation = evaluateLevelState(currentState, parSteps, stepsTaken, options.objectives);
+  const instructionCount = program.nodes.length;
+  const evaluation = evaluateLevelState(
+    currentState,
+    parSteps,
+    stepsTaken,
+    options.objectives,
+    instructionCount
+  );
 
   if (currentState.status === "FAILED") {
     return {

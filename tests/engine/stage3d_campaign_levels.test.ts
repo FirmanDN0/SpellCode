@@ -306,6 +306,8 @@ describe("Tahap 3D: Level Campaign & Gameplay Integration", () => {
         expect(result.status).toBe("VICTORY");
         expect(result.evaluation.isVictory).toBe(true);
         expect(result.evaluation.atPortal).toBe(true);
+        expect(result.evaluation.stars).toBe(3);
+        expect(result.evaluation.xpEarned).toBe(100);
       });
 
       it("fails if repeat count is insufficient", () => {
@@ -348,6 +350,7 @@ describe("Tahap 3D: Level Campaign & Gameplay Integration", () => {
 
         expect(result.status).toBe("VICTORY");
         expect(result.evaluation.isVictory).toBe(true);
+        expect(result.evaluation.stars).toBe(3);
       });
 
       it("fails if player stops halfway up staircase", () => {

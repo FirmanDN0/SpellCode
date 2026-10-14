@@ -3,13 +3,15 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sparkles, Map, BookOpen, User, Star, Zap, Menu, X, Volume2 } from "lucide-react";
+import { Sparkles, Map, BookOpen, User, Star, Zap, Menu, X } from "lucide-react";
 import { getGuestData, GuestData } from "@/lib/storage/guestStorage";
+import { useUserSession } from "@/lib/supabase/useUserSession";
 import { SoundToggle } from "../ui/SoundToggle";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const pathname = usePathname();
+  const { profile, isOnline } = useUserSession();
   const [guestData, setGuestData] = useState<GuestData | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -27,12 +29,18 @@ export function Navbar() {
     ? Object.values(guestData.progress).reduce((acc, p) => acc + (p.stars || 0), 0)
     : 0;
 
-  const totalXp = guestData?.profile.totalXp ?? 0;
+  const totalXp = profile?.total_xp ?? guestData?.profile.totalXp ?? 0;
+
+  // Nama label profil: jika sudah login gunakan nama pemain / "Profil Akun", bukan "Profil Magang"
+  const displayName = profile?.display_name || guestData?.profile.displayName;
+  const profileLabel = isOnline
+    ? (displayName ? (displayName.length > 14 ? `${displayName.slice(0, 12)}...` : displayName) : "Profil Akun")
+    : "Profil Magang";
 
   const navLinks = [
     { href: "/map", label: "Peta Petualangan", icon: Map },
     { href: "/grimoire", label: "Buku Mantra", icon: BookOpen },
-    { href: "/profile", label: "Profil Magang", icon: User },
+    { href: "/profile", label: profileLabel, icon: User },
   ];
 
   return (
@@ -61,10 +69,12 @@ export function Navbar() {
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
+            const isProfile = link.href === "/profile";
             return (
               <Link
                 key={link.href}
                 href={link.href}
+                title={isProfile && isOnline ? `Akun Cloud: ${displayName}` : undefined}
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-rune text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spell-teal-400",
                   isActive
@@ -72,7 +82,15 @@ export function Navbar() {
                     : "text-spell-purple-200 hover:text-white hover:bg-spell-purple-900/60"
                 )}
               >
-                <Icon className={cn("w-4 h-4", isActive ? "text-spell-gold-400" : "text-spell-purple-400")} />
+                <div className="relative flex items-center">
+                  <Icon className={cn("w-4 h-4", isActive ? "text-spell-gold-400" : "text-spell-purple-400")} />
+                  {isProfile && isOnline && (
+                    <span
+                      className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-spell-emerald-400 ring-2 ring-spell-purple-950"
+                      title="Akun Cloud Aktif"
+                    />
+                  )}
+                </div>
                 <span>{link.label}</span>
               </Link>
             );
@@ -133,6 +151,7 @@ export function Navbar() {
           {navLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
+            const isProfile = link.href === "/profile";
             return (
               <Link
                 key={link.href}
@@ -145,7 +164,12 @@ export function Navbar() {
                     : "text-spell-purple-200 hover:bg-spell-purple-950/60"
                 )}
               >
-                <Icon className="w-5 h-5 text-spell-teal-400" />
+                <div className="relative flex items-center">
+                  <Icon className="w-5 h-5 text-spell-teal-400" />
+                  {isProfile && isOnline && (
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-spell-emerald-400 ring-2 ring-spell-purple-900" />
+                  )}
+                </div>
                 <span>{link.label}</span>
               </Link>
             );

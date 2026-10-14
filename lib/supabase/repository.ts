@@ -79,10 +79,16 @@ export async function updateProfileAppearance(
   const supabase = createClient();
   const payload: Partial<Database["public"]["Tables"]["profiles"]["Update"]> = {};
 
-  if (updates.displayName !== undefined) payload.display_name = updates.displayName;
-  if (updates.avatarId !== undefined) payload.avatar_id = updates.avatarId;
-  if (updates.activeFamiliarId !== undefined)
-    payload.active_familiar_id = updates.activeFamiliarId;
+  if (updates.displayName !== undefined) {
+    const trimmed = updates.displayName.trim().slice(0, 30);
+    payload.display_name = trimmed || "Penyihir Cilik";
+  }
+  if (updates.avatarId !== undefined) {
+    payload.avatar_id = updates.avatarId.trim().slice(0, 50);
+  }
+  if (updates.activeFamiliarId !== undefined) {
+    payload.active_familiar_id = updates.activeFamiliarId.trim().slice(0, 50);
+  }
 
   payload.updated_at = new Date().toISOString();
 
