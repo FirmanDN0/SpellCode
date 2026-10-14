@@ -19,9 +19,8 @@ import {
   createEmptyProgram,
   createRepeatNode,
 } from "@/lib/engine/ast";
-import { createSpellVM } from "@/lib/engine/vm";
-import { applyStep, createInitialGridState } from "@/lib/engine/grid";
-import { evaluateLevelState, EvaluationResult } from "@/lib/engine/evaluator";
+import { EvaluationResult } from "@/lib/engine/evaluator";
+import { useExecutionController } from "@/lib/engine/useExecutionController";
 import {
   getDraftAst,
   saveDraftAst,
@@ -74,53 +73,48 @@ function LevelNotFoundView() {
 }
 
 function PlayLevelContent({ level }: { level: LevelDefinition }) {
-  // Buat state grid awal dari konfigurasi level menggunakan factory murni engine
-  const createInitialState = useCallback((): LevelGridState => {
-    return createInitialGridState(level.grid);
-  }, [level]);
+  const {
+    snapshot,
+    step: controllerStep,
+    run: controllerRun,
+    reset: controllerReset,
+    setProgram: controllerSetProgram,
+    clearProgram: controllerClearProgram,
+  } = useExecutionController(level);
 
-  const [gridState, setGridState] = useState<LevelGridState>(createInitialState);
-  const [program, setProgram] = useState<SpellProgram>(createEmptyProgram);
-  const [activeNodeId, setActiveNodeId] = useState<string | undefined>();
-  const [misfireNodeId, setMisfireNodeId] = useState<string | undefined>();
-  const [isRunning, setIsRunning] = useState<boolean>(false);
   const [speed, setSpeed] = useState<1 | 2>(1);
-  const [stepsTaken, setStepsTaken] = useState<number>(0);
   const [isVictoryModalOpen, setIsVictoryModalOpen] = useState<boolean>(false);
   const [evalResult, setEvalResult] = useState<EvaluationResult | null>(null);
   const [newRankNotice, setNewRankNotice] = useState<{ isNew: boolean; rank?: string }>({ isNew: false });
   const [mobileView, setMobileView] = useState<"all" | "arena" | "editor">("all");
 
-  // Ref untuk VM generator saat eksekusi berjalan
-  const activeVmRef = useRef<Generator<ExecutionStep, void, unknown> | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Pulihkan draf susunan blok terakhir jika ada
+  // Inisialisasi atau pulihkan draf susunan blok terakhir
   useEffect(() => {
     const draft = getDraftAst(level.id);
     if (draft && draft.nodes.length > 0) {
-      setProgram(draft);
+      controllerSetProgram(draft);
     } else {
-      setProgram(createEmptyProgram());
+      controllerSetProgram(createEmptyProgram());
     }
-    setGridState(createInitialState());
-    setActiveNodeId(undefined);
-    setMisfireNodeId(undefined);
-    setIsRunning(false);
-    setStepsTaken(0);
     setIsVictoryModalOpen(false);
-  }, [level.id, createInitialState]);
+  }, [level.id, controllerSetProgram]);
 
-  // Bersihkan timer saat unmount
+  const program = snapshot.program;
+  const gridState = snapshot.worldState;
+  const isRunning = snapshot.isRunning;
+  const activeNodeId = snapshot.activeNodeId;
+  const misfireNodeId = snapshot.misfireNodeId;
+  const stepsTaken = snapshot.stepsTaken;
+
+  // Sinkronisasi evalResult saat selesai
   useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
+    if (snapshot.evaluation) {
+      setEvalResult(snapshot.evaluation);
+    }
+  }, [snapshot.evaluation]);
 
-  // Update draf lokal
   const updateProgram = (newProgram: SpellProgram) => {
-    setProgram(newProgram);
+    controllerSetProgram(newProgram);
     saveDraftAst(level.id, newProgram);
   };
 
@@ -163,8 +157,8 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
   };
 
   const handleClearDeck = () => {
-    updateProgram(createEmptyProgram());
-    handleReset();
+    controllerClearProgram();
+    saveDraftAst(level.id, createEmptyProgram());
   };
 
   const handleUpdateRepeatCount = (nodeId: string, newCount: number) => {
@@ -202,145 +196,70 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
     updateProgram({ ...program, nodes: updatedNodes });
   };
 
-  const handleReset = () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    activeVmRef.current = null;
-    setIsRunning(false);
-    setActiveNodeId(undefined);
-    setMisfireNodeId(undefined);
-    setStepsTaken(0);
-    setGridState(createInitialState());
+  const playSoundForCommand = (command?: CommandType) => {
+    if (command === "STEP_FORWARD") soundManager.playStep();
+    else if (command === "TURN_LEFT" || command === "TURN_RIGHT") soundManager.playTurn();
+    else if (command === "LIGHT_TORCH") soundManager.playTorch();
+    else if (command === "COLLECT_SHARD") soundManager.playShard();
+    else if (command === "ACTIVATE") soundManager.playTorch();
   };
 
-  // Eksekusi satu langkah (Step Next)
+  const handleVictory = (evaluation: EvaluationResult, finalSteps: number) => {
+    soundManager.playVictory();
+    const saveRes = saveLevelResult(
+      level.id,
+      evaluation.stars,
+      finalSteps,
+      program,
+      evaluation.xpEarned
+    );
+    setNewRankNotice({ isNew: saveRes.isNewRank, rank: saveRes.newRank });
+    setIsVictoryModalOpen(true);
+  };
+
   const handleStep = () => {
     if (isRunning) return;
+    const hasNext = controllerStep();
+    const currentEvents = snapshot.events;
+    const latestEvent = currentEvents[currentEvents.length - 1];
 
-    if (!activeVmRef.current) {
-      if (program.nodes.length === 0) return;
-      activeVmRef.current = createSpellVM(program, 100);
-      setGridState((prev) => ({ ...prev, status: "RUNNING" }));
-    }
-
-    try {
-      const nextYield = activeVmRef.current.next();
-      if (!nextYield.done) {
-        const step = nextYield.value;
-        setActiveNodeId(step.activeNodeId);
-        setStepsTaken((prev) => prev + 1);
-
-        // Suara interaksi
-        if (step.command === "STEP_FORWARD") soundManager.playStep();
-        else if (step.command === "TURN_LEFT" || step.command === "TURN_RIGHT") soundManager.playTurn();
-        else if (step.command === "LIGHT_TORCH") soundManager.playTorch();
-        else if (step.command === "COLLECT_SHARD") soundManager.playShard();
-
-        setGridState((currentState) => {
-          const nextState = applyStep(currentState, step);
-          if (nextState.status === "FAILED") {
-            soundManager.playMisfire();
-            setMisfireNodeId(step.activeNodeId);
-            activeVmRef.current = null;
-          }
-          return nextState;
-        });
-      } else {
-        // VM selesai
-        finishSimulation(gridState, stepsTaken);
-        activeVmRef.current = null;
+    if (hasNext) {
+      playSoundForCommand(latestEvent?.command);
+    } else {
+      if (snapshot.status === "FAILED") {
+        soundManager.playMisfire();
+      } else if (snapshot.evaluation?.isVictory) {
+        handleVictory(snapshot.evaluation, snapshot.stepsTaken);
       }
-    } catch (err: unknown) {
-      soundManager.playMisfire();
-      setGridState((prev) => ({
-        ...prev,
-        status: "FAILED",
-        failureReason: err instanceof Error ? err.message : "Mantra terhenti!",
-      }));
-      activeVmRef.current = null;
     }
   };
 
-  // Eksekusi otomatis dari awal hingga akhir (Play)
-  const handlePlay = () => {
+  const handlePlay = async () => {
     if (isRunning || program.nodes.length === 0) return;
 
-    handleReset();
-    setIsRunning(true);
-
-    const vm = createSpellVM(program, 100);
-    let currentLocalState = createInitialState();
-    let currentSteps = 0;
-
+    controllerReset();
     const delay = speed === 1 ? 400 : 220;
 
-    const runNext = () => {
-      try {
-        const result = vm.next();
-        if (!result.done) {
-          const step = result.value;
-          setActiveNodeId(step.activeNodeId);
-          currentSteps++;
-          setStepsTaken(currentSteps);
-
-          // Efek suara
-          if (step.command === "STEP_FORWARD") soundManager.playStep();
-          else if (step.command === "TURN_LEFT" || step.command === "TURN_RIGHT") soundManager.playTurn();
-          else if (step.command === "LIGHT_TORCH") soundManager.playTorch();
-          else if (step.command === "COLLECT_SHARD") soundManager.playShard();
-
-          currentLocalState = applyStep(currentLocalState, step);
-          setGridState(currentLocalState);
-
-          if (currentLocalState.status === "FAILED") {
-            soundManager.playMisfire();
-            setMisfireNodeId(step.activeNodeId);
-            setIsRunning(false);
-            return;
-          }
-
-          timerRef.current = setTimeout(runNext, delay);
-        } else {
-          // VM selesai, evaluasi hasil
-          setIsRunning(false);
-          setActiveNodeId(undefined);
-          finishSimulation(currentLocalState, currentSteps);
+    const result = await controllerRun({
+      speedMs: delay,
+      onStep: (event) => {
+        if (event.type === "STEP_COMPLETE") {
+          playSoundForCommand(event.command);
         }
-      } catch (err: unknown) {
-        soundManager.playMisfire();
-        setIsRunning(false);
-        setGridState((prev) => ({
-          ...prev,
-          status: "FAILED",
-          failureReason: err instanceof Error ? err.message : "Energi manamu overflow!",
-        }));
-      }
-    };
+      },
+    });
 
-    timerRef.current = setTimeout(runNext, 100);
+    if (result) {
+      if (result.status === "VICTORY") {
+        handleVictory(result.evaluation, result.totalSteps);
+      } else {
+        soundManager.playMisfire();
+      }
+    }
   };
 
-  const finishSimulation = (finalState: LevelGridState, finalSteps: number) => {
-    const evaluation = evaluateLevelState(finalState, level.parSteps, finalSteps);
-    setEvalResult(evaluation);
-
-    if (evaluation.isVictory) {
-      setGridState((prev) => ({ ...prev, status: "VICTORY" }));
-      const saveRes = saveLevelResult(
-        level.id,
-        evaluation.stars,
-        finalSteps,
-        program,
-        evaluation.xpEarned
-      );
-      setNewRankNotice({ isNew: saveRes.isNewRank, rank: saveRes.newRank });
-      setIsVictoryModalOpen(true);
-    } else {
-      setGridState((prev) => ({
-        ...prev,
-        status: "FAILED",
-        failureReason: evaluation.message,
-      }));
-    }
+  const handleReset = () => {
+    controllerReset();
   };
 
   const nextLevel = getNextLevel(level.id);

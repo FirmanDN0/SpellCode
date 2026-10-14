@@ -1,4 +1,4 @@
-import { CommandType, Direction, GridPosition, ShardEntity, TorchEntity } from "../engine/types";
+import { CommandType, Direction, GridPosition, Objective, ShardEntity, TorchEntity } from "../engine/types";
 
 export interface LevelGridConfig {
   width: number;
@@ -23,6 +23,7 @@ export interface LevelDefinition {
   description: string;
   conceptTag: "Sequencing" | "Loops" | "Pattern Recognition";
   grid: LevelGridConfig;
+  objectives?: Objective[];
   allowedRunes: CommandType[];
   allowRepeatRune?: boolean;
   parSteps: number;
