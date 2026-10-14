@@ -165,10 +165,11 @@ Pengujian unit diimplementasikan menggunakan Vitest dengan konfigurasi native ES
  ✓ tests/engine/stage3a_data_model.test.ts (19 tests)
  ✓ tests/engine/controller.test.ts (11 tests)
  ✓ tests/engine/stage3c_debug_vision.test.ts (10 tests)
+ ✓ tests/engine/stage3d_campaign_levels.test.ts (25 tests)
 
- Test Files  11 passed (11)
-      Tests  86 passed (86)
-   Duration  1.40s
+ Test Files  12 passed (12)
+      Tests  111 passed (111)
+   Duration  2.03s
 ```
 
 ### Rincian Cakupan Unit Test
@@ -252,6 +253,12 @@ Pengujian unit diimplementasikan menggunakan Vitest dengan konfigurasi native ES
     * Evaluasi objektif yang jujur ketika program selesai tanpa mencapai kemenangan (`isVictory: false`, rincian objektif belum terpenuhi).
     * Trace snapshot pada `ExecutionController` untuk kebutuhan debugging visual UI.
 
+12. **`stage3d_campaign_levels.test.ts` (25 tests)**:
+    * Verifikasi keberadaan dan integritas seluruh 12 level MVP.
+    * Bukti solusi valid untuk masing-masing 12 level yang menghasilkan status `VICTORY`.
+    * Bukti kegagalan untuk program salah, incomplete objectives, tabrakan rintangan, dan salah parameter.
+    * Pembuktian fitur debugging dengan perbaikan initial buggy program.
+
 ---
 
 ## 6. Fitur Debug Vision & Panduan Pemain
@@ -264,8 +271,30 @@ Debug Vision dirancang khusus agar anak-anak memahami penyebab kesalahan program
    Jika terjadi tabrakan atau kesalahan eksekusi, balok penyebab kesalahan (`misfireNodeId`) berkedip merah terang dan nomor langkah (`stepNumber`) dicatat.
 3. **Penjelasan Kesalahan Sederhana (Pyx Companion)**:
    Kesalahan dijelaskan dengan analogi fantasi ramah anak (contoh: "Terhalang semak berduri atau batu besar!") bukan pesan error teknis JavaScript mentah.
-4. **Hint Tanpa Membocorkan Jawaban Langsung**:
+4. **Hint Bertahap (Progressive Hint Disclosure)**:
    Tombol "Butuh Petunjuk?" memungkinkan anak membuka petunjuk bertahap dari Pyx si Kucing Api tanpa secara otomatis merusak tantangan eksplorasi.
 5. **Aksi Cepat Pengulangan & Penelusuran**:
    Saat program gagal, tombol "Ulangi Misi (Reset)" dan "Telusuri Langkah (Step)" langsung tersedia di panel panduan Pyx agar anak dapat segera menganalisis mantranya langkah demi langkah.
+
+---
+
+## 7. Desain Kampanye Pedagogis MVP (Tahap 3D)
+
+Kumpulan 12 level MVP dirancang dengan progresi belajar bertingkat tanpa duplikasi mekanik:
+
+| ID | Realm / World | Judul Level | Konsep Pedagogis | Par Steps | Rune Tersedia | Objektif Utama |
+|---|---|---|---|---|---|---|
+| `w1-l1` | Whispering Woods | Langkah Pertama Magang | Sequencing | 3 | Maju | Portal |
+| `w1-l2` | Whispering Woods | Belokan di Tikungan Peri | Movement & Direction | 3 | Maju, Putar Kanan | Portal |
+| `w1-l3` | Whispering Woods | Cahaya Lentera & Kristal Mana | Object Activation | 6 | Maju, Lentera, Kristal | Lentera, Kristal, Portal |
+| `w1-l4` | Whispering Woods | Menembus Semak Berduri | Movement & Direction | 7 | Maju, Putar Kiri, Putar Kanan | Rute Memutar, Portal |
+| `w1-l5` | Whispering Woods | Mantra Magang yang Tersesat | Debugging | 4 | Maju, Putar Kiri, Putar Kanan | Diagnosis & Perbaikan Tabrakan |
+| `w1-l6` | Whispering Woods | Ujian Harmoni Dua Lentera | Sequencing Milestone | 9 | Maju, Putar, Lentera | 2 Lentera, Portal |
+| `w2-l1` | Crystal Caverns | Lorong Kristal Berulang | Loops | 1 | Maju, Ulangi | Perulangan 5 Langkah |
+| `w2-l2` | Crystal Caverns | Tangga Kristal Berundak | Loops | 1 | Maju, Putar, Ulangi | Perulangan Pola Undakan 3x |
+| `w2-l3` | Crystal Caverns | Sensor Kabut Kristal | Conditionals | 2 | Maju, Putar, Jika | Evaluasi Predikat Rintangan |
+| `w2-l4` | Crystal Caverns | Penjelajah Labirin Otomatis | Conditionals & Loops | 1 | Maju, Putar, Ulangi, Jika | Loop Bersyarat Dinamis |
+| `w2-l5` | Crystal Caverns | Misfire di Jurang Kristal | Debugging | 1 | Maju, Ulangi | Perbaikan Parameter Off-by-one |
+| `w2-l6` | Crystal Caverns | Mahkota Kristal Agung | Master Integration | 8 | Semua Rune + Loop + Jika | Altar Ageng: 2 Lentera, Kristal |
+
 

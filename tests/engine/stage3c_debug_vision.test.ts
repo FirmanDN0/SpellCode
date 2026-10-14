@@ -226,7 +226,7 @@ describe("Tahap 3C: Loops, Conditionals, and Debug Vision Trace", () => {
       expect(result.evaluation.message).toContain("belum tiba di portal");
 
       // Verifikasi tujuan yang belum terpenuhi diidentifikasi secara eksplisit
-      const uncompleted = result.evaluation.objectives.filter((o) => !o.isCompleted);
+      const uncompleted = (result.evaluation.objectives || []).filter((o) => !o.isCompleted);
       expect(uncompleted.length).toBeGreaterThan(0);
       expect(uncompleted.some((o) => o.type === "REACH_PORTAL")).toBe(true);
     });

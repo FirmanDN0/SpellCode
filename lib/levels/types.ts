@@ -1,4 +1,12 @@
-import { CommandType, Direction, GridPosition, Objective, ShardEntity, TorchEntity } from "../engine/types";
+import {
+  CommandType,
+  Direction,
+  GridPosition,
+  Objective,
+  ShardEntity,
+  SpellProgram,
+  TorchEntity,
+} from "../engine/types";
 
 export interface LevelGridConfig {
   width: number;
@@ -14,6 +22,12 @@ export interface LevelGridConfig {
   portal: GridPosition;
 }
 
+export interface LevelReward {
+  xp: number;
+  stars: number;
+  badge?: string;
+}
+
 export interface LevelDefinition {
   id: string;
   worldNumber: 1 | 2;
@@ -21,13 +35,25 @@ export interface LevelDefinition {
   worldTitle: string;
   title: string;
   description: string;
-  conceptTag: "Sequencing" | "Loops" | "Pattern Recognition" | "Conditionals";
+  conceptTag:
+    | "Sequencing"
+    | "Movement & Direction"
+    | "Object Activation"
+    | "Loops"
+    | "Conditionals"
+    | "Debugging"
+    | "Pattern Recognition";
   grid: LevelGridConfig;
   objectives?: Objective[];
   allowedRunes: CommandType[];
   allowRepeatRune?: boolean;
   allowConditionRune?: boolean;
   parSteps: number;
+  maxInstructions?: number;
+  maxSteps?: number;
   baseXp: number;
+  rewards?: LevelReward;
   hint: string;
+  hints?: string[];
+  initialProgram?: SpellProgram;
 }

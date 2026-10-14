@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 interface DebuggerGuideProps {
   message: string;
   hintText?: string;
+  hints?: string[];
   type?: "info" | "hint" | "misfire" | "victory";
   onShowHint?: () => void;
   onReset?: () => void;
@@ -18,6 +19,7 @@ interface DebuggerGuideProps {
 export function DebuggerGuide({
   message,
   hintText,
+  hints,
   type = "info",
   onShowHint,
   onReset,
@@ -26,6 +28,7 @@ export function DebuggerGuide({
   conditionFailed,
 }: DebuggerGuideProps) {
   const [showHintModal, setShowHintModal] = useState(false);
+  const [hintStep, setHintStep] = useState(0);
 
   const iconInfo = {
     info: {
@@ -125,7 +128,7 @@ export function DebuggerGuide({
               )}
             </span>
 
-            {hintText && (
+            {(hintText || (hints && hints.length > 0)) && (
               <button
                 type="button"
                 onClick={() => {
@@ -198,14 +201,36 @@ export function DebuggerGuide({
         </div>
       </div>
 
-      {/* Accordion Panel Petunjuk Khusus */}
-      {showHintModal && hintText && (
+      {/* Accordion Panel Petunjuk Bertahap */}
+      {showHintModal && (hintText || (hints && hints.length > 0)) && (
         <div className="mt-3 pt-3 border-t border-spell-purple-800 p-2.5 rounded-xl bg-spell-teal-950/60 border border-spell-teal-500/30 text-xs text-spell-teal-200 leading-relaxed animate-in fade-in duration-200">
-          <p className="font-bold text-spell-teal-100 mb-1 flex items-center gap-1.5">
+          <p className="font-bold text-spell-teal-100 mb-2 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-spell-gold-300" />
             <span>Petunjuk Misi dari Pyx:</span>
           </p>
-          <p>{hintText}</p>
+
+          {hints && hints.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {hints.slice(0, hintStep + 1).map((h, i) => (
+                <div key={i} className="p-2 rounded bg-spell-teal-900/50 border border-spell-teal-600/30">
+                  <span className="font-bold text-spell-gold-300 mr-1.5">Petunjuk {i + 1}:</span>
+                  <span>{h}</span>
+                </div>
+              ))}
+
+              {hintStep < hints.length - 1 && (
+                <button
+                  type="button"
+                  onClick={() => setHintStep((prev) => Math.min(prev + 1, hints.length - 1))}
+                  className="self-start text-[11px] font-bold text-spell-gold-300 hover:text-white underline mt-1"
+                >
+                  Masih bingung? Buka petunjuk berikutnya ({hintStep + 2}/{hints.length})
+                </button>
+              )}
+            </div>
+          ) : (
+            <p>{hintText}</p>
+          )}
         </div>
       )}
     </div>

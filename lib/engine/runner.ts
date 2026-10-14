@@ -6,11 +6,13 @@ import {
   ExecutionEvent,
   ExecutionResult,
   LevelGridState,
+  Objective,
   SpellProgram,
 } from "./types";
 
 export interface RunOptions {
   maxSteps?: number;
+  objectives?: Objective[];
 }
 
 /**
@@ -128,7 +130,7 @@ export function runSpellProgram(
   }
 
   // Evaluasi Objective Level
-  const evaluation = evaluateLevelState(currentState, parSteps, stepsTaken);
+  const evaluation = evaluateLevelState(currentState, parSteps, stepsTaken, options.objectives);
 
   if (currentState.status === "FAILED") {
     return {

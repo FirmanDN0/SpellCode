@@ -96,11 +96,13 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
     const draft = getDraftAst(level.id);
     if (draft && draft.nodes.length > 0) {
       controllerSetProgram(draft);
+    } else if (level.initialProgram && level.initialProgram.nodes.length > 0) {
+      controllerSetProgram(level.initialProgram);
     } else {
       controllerSetProgram(createEmptyProgram());
     }
     setIsVictoryModalOpen(false);
-  }, [level.id, controllerSetProgram]);
+  }, [level.id, level.initialProgram, controllerSetProgram]);
 
   const program = snapshot.program;
   const gridState = snapshot.worldState;
@@ -383,6 +385,7 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
             <DebuggerGuide
               message={getGuideMessage()}
               hintText={level.hint}
+              hints={level.hints}
               type={
                 gridState.status === "FAILED"
                   ? "misfire"
