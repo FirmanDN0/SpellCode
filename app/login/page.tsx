@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Sparkles,
   Mail,
@@ -14,17 +14,48 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
+  Info,
 } from "lucide-react";
 import { Button, Input } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
 import { getGuestData } from "@/lib/storage/guestStorage";
 import { syncGuestDataToOnline } from "@/lib/supabase/repository";
+import {
+  validateEmail,
+  validatePassword,
+  validateUsername,
+  getFriendlyAuthErrorMessage,
+} from "@/lib/supabase/auth";
 
 type AuthMode = "login" | "signup" | "magic_link";
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginLoadingFallback />}>
+      <LoginContent />
+    </Suspense>
+  );
+}
+
+function LoginLoadingFallback() {
+  return (
+    <div className="flex-1 flex items-center justify-center p-6">
+      <div className="p-8 rounded-dialog bg-spell-purple-900 border border-spell-purple-700 flex flex-col items-center gap-3">
+        <Loader2 className="w-8 h-8 text-spell-teal-400 animate-spin" />
+        <span className="text-sm text-spell-purple-200">Menghubungkan ke Gerbang Akademi...</span>
+      </div>
+    </div>
+  );
+}
+
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+
+  const nextUrl = searchParams.get("next") || "/map";
+  const urlMessage = searchParams.get("message");
+  const urlError = searchParams.get("error");
 
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
@@ -33,8 +64,20 @@ export default function LoginPage() {
   const [displayName, setDisplayName] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(
+    urlError === "auth-code-error"
+      ? "Tautan akses tidak valid atau sudah kedaluwarsa. Silakan minta tautan baru!"
+      : null
+  );
   const [isMagicLinkSent, setIsMagicLinkSent] = useState(false);
+
+  // Pesan informatif dari URL
+  const infoBannerMessage =
+    urlMessage === "logged_out"
+      ? "Kamu telah berhasil keluar dari akun akademi. Sampai jumpa lagi!"
+      : urlMessage === "auth_required"
+      ? "Masuk atau buat akun terlebih dahulu untuk melanjutkan petualangan ini!"
+      : null;
 
   const handlePostAuthSuccess = async (userId: string) => {
     // Sinkronkan progres lokal jika ada
@@ -46,12 +89,39 @@ export default function LoginPage() {
         console.warn("Sinkronisasi otomatis progres lokal dilewati:", e);
       }
     }
-    router.push("/map");
+    router.push(nextUrl);
   };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+
+    // 1. Validasi Input di sisi Client
+    const emailVal = validateEmail(email);
+    if (!emailVal.isValid) {
+      setErrorMessage(emailVal.error || "Email tidak valid.");
+      return;
+    }
+
+    if (mode === "signup") {
+      const userVal = validateUsername(username);
+      if (!userVal.isValid) {
+        setErrorMessage(userVal.error || "Username tidak valid.");
+        return;
+      }
+      const passVal = validatePassword(password);
+      if (!passVal.isValid) {
+        setErrorMessage(passVal.error || "Kata sandi tidak valid.");
+        return;
+      }
+    } else if (mode === "login") {
+      const passVal = validatePassword(password);
+      if (!passVal.isValid) {
+        setErrorMessage(passVal.error || "Kata sandi tidak valid.");
+        return;
+      }
+    }
+
     setIsLoading(true);
 
     try {
@@ -59,21 +129,18 @@ export default function LoginPage() {
         const { error } = await supabase.auth.signInWithOtp({
           email: email.trim(),
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`,
           },
         });
         if (error) throw error;
         setIsMagicLinkSent(true);
       } else if (mode === "signup") {
-        if (!password || password.length < 6) {
-          throw new Error("Kata sandi harus minimal 6 karakter.");
-        }
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
             data: {
-              username: username.trim() || undefined,
+              username: username.trim().toLowerCase(),
               display_name: displayName.trim() || "Penyihir Cilik",
             },
           },
@@ -90,20 +157,13 @@ export default function LoginPage() {
           email: email.trim(),
           password,
         });
-        if (error) {
-          if (error.message.includes("Invalid login credentials")) {
-            throw new Error("Email atau kata sandi tidak cocok. Periksa kembali!");
-          }
-          throw error;
-        }
+        if (error) throw error;
         if (data.user) {
           await handlePostAuthSuccess(data.user.id);
         }
       }
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Terjadi kendala saat menghubungkan ke akademi.";
-      setErrorMessage(msg);
+      setErrorMessage(getFriendlyAuthErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
@@ -132,6 +192,7 @@ export default function LoginPage() {
         <div className="w-full flex rounded-xl bg-spell-purple-950/70 p-1 border border-spell-purple-800/80 mt-5 mb-3">
           <button
             type="button"
+            disabled={isLoading}
             onClick={() => {
               setMode("login");
               setErrorMessage(null);
@@ -146,6 +207,7 @@ export default function LoginPage() {
           </button>
           <button
             type="button"
+            disabled={isLoading}
             onClick={() => {
               setMode("signup");
               setErrorMessage(null);
@@ -160,6 +222,7 @@ export default function LoginPage() {
           </button>
           <button
             type="button"
+            disabled={isLoading}
             onClick={() => {
               setMode("magic_link");
               setErrorMessage(null);
@@ -174,7 +237,15 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* Notifikasi Error */}
+        {/* Banner Pesan Info URL (Logout / Auth Required) */}
+        {infoBannerMessage && !errorMessage && (
+          <div className="w-full my-2 p-3 rounded-card bg-spell-teal-950/70 border border-spell-teal-500/40 text-spell-teal-200 text-xs text-left flex items-start gap-2.5 animate-in fade-in">
+            <Info className="w-4 h-4 text-spell-teal-400 shrink-0 mt-0.5" />
+            <span>{infoBannerMessage}</span>
+          </div>
+        )}
+
+        {/* Notifikasi Error Ramah Anak */}
         {errorMessage && (
           <div className="w-full my-2 p-3 rounded-card bg-spell-ruby-950/80 border border-spell-ruby-500/50 text-spell-ruby-200 text-xs text-left flex items-start gap-2.5 animate-in fade-in">
             <AlertCircle className="w-4 h-4 text-spell-ruby-400 shrink-0 mt-0.5" />
@@ -206,6 +277,7 @@ export default function LoginPage() {
                 <Input
                   id="displayName"
                   type="text"
+                  disabled={isLoading}
                   label="Nama Panggilan Penyihir"
                   placeholder="Contoh: Aria Si Cerdik"
                   value={displayName}
@@ -216,7 +288,8 @@ export default function LoginPage() {
                   id="username"
                   type="text"
                   required
-                  label="Username Akun"
+                  disabled={isLoading}
+                  label="Username Akun (3-20 karakter)"
                   placeholder="aria_magus"
                   value={username}
                   onChange={(e) => setUsername(e.target.value.toLowerCase())}
@@ -229,6 +302,7 @@ export default function LoginPage() {
               id="email"
               type="email"
               required
+              disabled={isLoading}
               label="Alamat Email Orang Tua / Siswa"
               placeholder="penyihir@contoh.com"
               value={email}
@@ -241,7 +315,8 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 required
-                label="Kata Sandi Rahasia"
+                disabled={isLoading}
+                label="Kata Sandi Rahasia (Min. 6 Karakter)"
                 placeholder="Minimal 6 karakter"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -279,10 +354,11 @@ export default function LoginPage() {
 
         {/* Akses Cepat Mode Tamu */}
         <div className="pt-4 border-t border-spell-purple-800 w-full flex flex-col gap-3">
-          <Link href="/map" className="w-full">
+          <Link href={nextUrl} className="w-full">
             <Button
               variant="ghost"
               size="md"
+              disabled={isLoading}
               className="w-full text-xs text-spell-teal-300 hover:text-white"
             >
               <ArrowLeft className="w-4 h-4" />

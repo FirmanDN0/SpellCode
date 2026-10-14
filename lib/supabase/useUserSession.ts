@@ -98,11 +98,19 @@ export function useUserSession(): UserSessionState {
 
   const signOut = useCallback(async () => {
     setIsLoading(true);
-    await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
-    setProgress({});
-    setIsLoading(false);
+    try {
+      await supabase.auth.signOut();
+      // Panggil server route untuk membersihkan cookie sesi di HTTP response headers
+      await fetch("/auth/signout", { method: "POST" });
+    } catch (e) {
+      console.warn("Sign out server call warning:", e);
+    } finally {
+      setUser(null);
+      setProfile(null);
+      setProgress({});
+      setIsLoading(false);
+      window.location.href = "/login?message=logged_out";
+    }
   }, [supabase]);
 
   return {
