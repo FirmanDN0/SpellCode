@@ -228,7 +228,7 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
     else if (command === "ACTIVATE") soundManager.playTorch();
   };
 
-  const handleVictory = (evaluation: EvaluationResult, finalSteps: number) => {
+  const handleVictory = async (evaluation: EvaluationResult, finalSteps: number) => {
     soundManager.playVictory();
     const saveRes = saveLevelResult(
       level.id,
@@ -239,6 +239,26 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
     );
     setNewRankNotice({ isNew: saveRes.isNewRank, rank: saveRes.newRank });
     setIsVictoryModalOpen(true);
+
+    // Kirim submission terverifikasi ke server Supabase secara asynchronous
+    try {
+      const res = await fetch("/api/progress/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          levelId: level.id,
+          program,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.isNewRank && data.wizardRank) {
+          setNewRankNotice({ isNew: true, rank: data.wizardRank });
+        }
+      }
+    } catch (err) {
+      console.warn("Server progress submission offline/dilewati:", err);
+    }
   };
 
   const handleStep = () => {

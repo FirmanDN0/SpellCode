@@ -2,43 +2,88 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { User, Star, Zap, Award, Cloud, Edit2, Check, CheckCircle2 } from "lucide-react";
+import {
+  User,
+  Star,
+  Zap,
+  Award,
+  Cloud,
+  Edit2,
+  Check,
+  CheckCircle2,
+  LogOut,
+  ShieldCheck,
+  Loader2,
+} from "lucide-react";
 import { getGuestData, updateDisplayName, GuestData } from "@/lib/storage/guestStorage";
 import { allLevels } from "@/lib/levels";
 import { Button } from "@/components/ui/Button";
+import { useUserSession } from "@/lib/supabase/useUserSession";
+import { updateProfileAppearance } from "@/lib/supabase/repository";
 
 export default function ProfilePage() {
+  const { user, profile, isOnline, signOut, isLoading } = useUserSession();
   const [guestData, setGuestData] = useState<GuestData | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [inputName, setInputName] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const data = getGuestData();
     setGuestData(data);
-    setInputName(data.profile.displayName);
-  }, []);
+    if (profile?.display_name) {
+      setInputName(profile.display_name);
+    } else {
+      setInputName(data.profile.displayName);
+    }
+  }, [profile]);
 
-  const handleSaveName = () => {
+  const handleSaveName = async () => {
     if (!inputName.trim()) return;
-    const updated = updateDisplayName(inputName);
-    setGuestData(updated);
-    setIsEditingName(false);
+    setIsSaving(true);
+    try {
+      const updated = updateDisplayName(inputName);
+      setGuestData(updated);
+
+      if (user && isOnline) {
+        await updateProfileAppearance(user.id, {
+          displayName: inputName.trim(),
+        });
+      }
+      setIsEditingName(false);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
+  const displayName =
+    profile?.display_name || guestData?.profile.displayName || "Penyihir Cilik";
+  const wizardRank =
+    profile?.wizard_rank || guestData?.profile.wizardRank || "Novice Conjurer";
+  const xp = profile?.total_xp ?? guestData?.profile.totalXp ?? 0;
+
   const totalStars = guestData
-    ? Object.values(guestData.progress).reduce((sum, p) => sum + (p.stars || 0), 0)
+    ? Object.values(guestData.progress).reduce(
+        (sum, p) => sum + (p.stars || 0),
+        0
+      )
     : 0;
 
   const completedLevelsCount = guestData
-    ? Object.values(guestData.progress).filter((p) => p.status === "completed").length
+    ? Object.values(guestData.progress).filter((p) => p.status === "completed")
+        .length
     : 0;
 
-  const xp = guestData?.profile.totalXp || 0;
-
-  // Target XP untuk rank berikutnya
-  const nextRankTarget = xp < 200 ? 200 : xp < 500 ? 500 : xp < 1000 ? 1000 : 2000;
-  const currentRankBase = xp < 200 ? 0 : xp < 500 ? 200 : xp < 1000 ? 500 : 1000;
-  const progressPercent = Math.min(100, Math.round(((xp - currentRankBase) / (nextRankTarget - currentRankBase)) * 100));
+  const nextRankTarget =
+    xp < 200 ? 200 : xp < 500 ? 500 : xp < 1000 ? 1000 : 2000;
+  const currentRankBase =
+    xp < 200 ? 0 : xp < 500 ? 200 : xp < 1000 ? 500 : 1000;
+  const progressPercent = Math.min(
+    100,
+    Math.round(
+      ((xp - currentRankBase) / (nextRankTarget - currentRankBase)) * 100
+    )
+  );
 
   const allAchievements = [
     {
@@ -75,7 +120,7 @@ export default function ProfilePage() {
         <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-br from-spell-purple-600 to-indigo-800 flex items-center justify-center text-4xl shadow-rune-purple border-2 border-spell-purple-400 shrink-0">
           <span>🧙‍♂️</span>
           <div className="absolute -bottom-2 px-3 py-0.5 rounded-full bg-spell-gold-500 text-spell-purple-950 text-[10px] font-black uppercase tracking-wider shadow">
-            Magang
+            {isOnline ? "Online" : "Magang"}
           </div>
         </div>
 
@@ -89,21 +134,27 @@ export default function ProfilePage() {
                   value={inputName}
                   onChange={(e) => setInputName(e.target.value)}
                   maxLength={25}
+                  disabled={isSaving}
                   className="px-3 py-1 rounded-lg bg-spell-purple-950 border border-spell-teal-400 text-white font-bold text-lg focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={handleSaveName}
-                  className="p-1.5 rounded-md bg-spell-emerald-600 text-white hover:bg-spell-emerald-500"
+                  disabled={isSaving}
+                  className="p-1.5 rounded-md bg-spell-emerald-600 text-white hover:bg-spell-emerald-500 disabled:opacity-50"
                   aria-label="Simpan Nama"
                 >
-                  <Check className="w-4 h-4" />
+                  {isSaving ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Check className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl sm:text-3xl font-black text-white">
-                  {guestData?.profile.displayName || "Penyihir Cilik"}
+                  {displayName}
                 </h1>
                 <button
                   type="button"
@@ -117,9 +168,17 @@ export default function ProfilePage() {
             )}
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-spell-gold-500/15 border border-spell-gold-500/30 text-spell-gold-300 text-xs font-bold mt-1">
-            <Award className="w-3.5 h-3.5 text-spell-gold-400" />
-            <span>Gelar: {guestData?.profile.wizardRank || "Novice Conjurer"}</span>
+          <div className="flex flex-wrap items-center gap-2 mt-1">
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-spell-gold-500/15 border border-spell-gold-500/30 text-spell-gold-300 text-xs font-bold">
+              <Award className="w-3.5 h-3.5 text-spell-gold-400" />
+              <span>Gelar: {wizardRank}</span>
+            </div>
+
+            {isOnline && profile?.username && (
+              <span className="text-xs text-spell-purple-300 font-mono">
+                @{profile.username}
+              </span>
+            )}
           </div>
 
           {/* Progress Bar Menuju Pangkat Berikutnya */}
@@ -139,20 +198,42 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Cloud Sync Callout Banner */}
+        {/* Cloud Sync & Auth Callout Banner */}
         <div className="w-full md:w-auto p-4 rounded-card bg-spell-purple-950/80 border border-spell-purple-800 flex flex-col items-center justify-center text-center shrink-0">
           <div className="p-2 rounded-full bg-spell-purple-900 text-spell-teal-400 mb-2">
-            <Cloud className="w-5 h-5" />
+            {isOnline ? (
+              <ShieldCheck className="w-5 h-5 text-spell-emerald-400" />
+            ) : (
+              <Cloud className="w-5 h-5" />
+            )}
           </div>
-          <p className="text-xs font-bold text-white">Status: Akun Tamu</p>
-          <p className="text-[11px] text-spell-purple-400 max-w-[180px] mt-0.5">
-            Tersimpan aman di browser kamu.
+          <p className="text-xs font-bold text-white">
+            {isOnline ? "Akun Cloud Aktif" : "Status: Akun Tamu"}
           </p>
-          <Link href="/login" className="mt-3 w-full">
-            <Button variant="secondary" size="sm" className="w-full text-xs">
-              Hubungkan Cloud
+          <p className="text-[11px] text-spell-purple-400 max-w-[180px] mt-0.5">
+            {isOnline
+              ? user?.email || "Tersimpan aman di Supabase"
+              : "Tersimpan di browser perangkat ini."}
+          </p>
+
+          {isOnline ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => signOut()}
+              disabled={isLoading}
+              className="mt-3 w-full text-xs text-spell-ruby-300 hover:text-white"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Keluar Sesi</span>
             </Button>
-          </Link>
+          ) : (
+            <Link href="/login" className="mt-3 w-full">
+              <Button variant="secondary" size="sm" className="w-full text-xs">
+                Hubungkan Cloud
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -163,9 +244,14 @@ export default function ProfilePage() {
             <Star className="w-6 h-6 fill-spell-gold-400" />
           </div>
           <div>
-            <p className="text-xs text-spell-purple-300 font-semibold">Total Bintang</p>
+            <p className="text-xs text-spell-purple-300 font-semibold">
+              Total Bintang
+            </p>
             <p className="text-2xl font-black text-white font-mono mt-0.5">
-              {totalStars} <span className="text-xs text-spell-purple-400 font-normal">/ {allLevels.length * 3}</span>
+              {totalStars}{" "}
+              <span className="text-xs text-spell-purple-400 font-normal">
+                / {allLevels.length * 3}
+              </span>
             </p>
           </div>
         </div>
@@ -175,8 +261,12 @@ export default function ProfilePage() {
             <Zap className="w-6 h-6 fill-spell-teal-400" />
           </div>
           <div>
-            <p className="text-xs text-spell-purple-300 font-semibold">Total Mana XP</p>
-            <p className="text-2xl font-black text-white font-mono mt-0.5">{xp} XP</p>
+            <p className="text-xs text-spell-purple-300 font-semibold">
+              Total Mana XP
+            </p>
+            <p className="text-2xl font-black text-white font-mono mt-0.5">
+              {xp} XP
+            </p>
           </div>
         </div>
 
@@ -185,9 +275,14 @@ export default function ProfilePage() {
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs text-spell-purple-300 font-semibold">Misi Terselesaikan</p>
+            <p className="text-xs text-spell-purple-300 font-semibold">
+              Misi Terselesaikan
+            </p>
             <p className="text-2xl font-black text-white font-mono mt-0.5">
-              {completedLevelsCount} <span className="text-xs text-spell-purple-400 font-normal">/ {allLevels.length} Level</span>
+              {completedLevelsCount}{" "}
+              <span className="text-xs text-spell-purple-400 font-normal">
+                / {allLevels.length} Level
+              </span>
             </p>
           </div>
         </div>
