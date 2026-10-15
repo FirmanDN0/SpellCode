@@ -23,9 +23,11 @@ export function Navbar() {
     };
     window.addEventListener("storage", handleStorage);
     window.addEventListener("spellcode_guest_reset", handleStorage);
+    window.addEventListener("spellcode_progress_updated", handleStorage);
     return () => {
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener("spellcode_guest_reset", handleStorage);
+      window.removeEventListener("spellcode_progress_updated", handleStorage);
     };
   }, [pathname]);
 

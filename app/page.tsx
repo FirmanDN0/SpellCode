@@ -27,9 +27,20 @@ export default function HomePage() {
   const [guestData, setGuestData] = useState<GuestData | null>(null);
 
   useEffect(() => {
-    const data = getGuestData();
-    setGuestData(data);
-    setSummary(getPlayerProgressSummary(data));
+    const handleUpdate = () => {
+      const data = getGuestData();
+      setGuestData(data);
+      setSummary(getPlayerProgressSummary(data));
+    };
+    handleUpdate();
+    window.addEventListener("spellcode_guest_reset", handleUpdate);
+    window.addEventListener("spellcode_progress_updated", handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+    return () => {
+      window.removeEventListener("spellcode_guest_reset", handleUpdate);
+      window.removeEventListener("spellcode_progress_updated", handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+    };
   }, []);
 
   const currentLevel = summary?.currentLevel;

@@ -131,7 +131,7 @@ export function VictoryModal({
       >
         {/* Hiasan Puncak */}
         <div className="absolute -top-6 px-6 py-1.5 rounded-full bg-gradient-to-r from-spell-gold-600 via-spell-gold-400 to-spell-gold-600 border-2 border-white text-spell-purple-950 font-black text-sm tracking-wider uppercase shadow-lg">
-          ✨ Mantra Selesai! ✨
+          {nextLevelId ? "✨ Mantra Selesai! ✨" : "🏆 Seluruh Realm Ditaklukkan! 🏆"}
         </div>
 
         {/* Tampilan Bintang Bouncy */}
@@ -246,7 +246,7 @@ export function VictoryModal({
           ) : (
             <Link href="/map" className="w-full" onClick={onClose}>
               <Button variant="primary" size="lg" className="w-full font-extrabold text-base">
-                <span>Selesai! Kembali ke Peta</span>
+                <span>Selamat! Kembali ke Peta Dunia</span>
                 <Map className="w-5 h-5" />
               </Button>
             </Link>
@@ -266,17 +266,31 @@ export function VictoryModal({
               <span>Ulangi Level</span>
             </Button>
 
-            <Link href="/map" className="w-full" onClick={onClose}>
-              <Button
-                variant="ghost"
-                size="md"
-                onClick={onClose}
-                className="w-full text-sm font-bold border border-spell-purple-700/80 hover:bg-spell-purple-800/80"
-              >
-                <Map className="w-4 h-4" />
-                <span>Peta Dunia</span>
-              </Button>
-            </Link>
+            {nextLevelId ? (
+              <Link href="/map" className="w-full" onClick={onClose}>
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={onClose}
+                  className="w-full text-sm font-bold border border-spell-purple-700/80 hover:bg-spell-purple-800/80"
+                >
+                  <Map className="w-4 h-4" />
+                  <span>Peta Dunia</span>
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/profile" className="w-full" onClick={onClose}>
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={onClose}
+                  className="w-full text-sm font-bold border border-spell-gold-500/60 text-spell-gold-300 hover:bg-spell-purple-800/80"
+                >
+                  <Award className="w-4 h-4 text-spell-gold-400" />
+                  <span>Lihat Gelar</span>
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>

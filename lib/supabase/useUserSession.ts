@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { User } from "@supabase/supabase-js";
 import { createClient } from "./client";
 import { ProfileRow, PlayerProgressRow } from "./types";
-import { fetchPlayerProfile, fetchPlayerProgress } from "./repository";
+import { fetchPlayerProfile, fetchPlayerProgress, syncGuestDataToOnline } from "./repository";
 import { getGuestData, saveGuestData, resetGuestDataToDefault } from "../storage/guestStorage";
 
 export interface UserSessionState {
@@ -27,16 +27,41 @@ export function useUserSession(): UserSessionState {
 
   const loadUserData = useCallback(async (currentUser: User) => {
     try {
-      const [prof, prog] = await Promise.all([
+      let [prof, prog] = await Promise.all([
         fetchPlayerProfile(currentUser.id),
         fetchPlayerProgress(currentUser.id),
       ]);
+
+      const local = getGuestData();
+
+      // Cek apakah ada progres lokal yang belum tersimpan di cloud atau memiliki bintang lebih tinggi
+      const hasUnsyncedLocalProgress = Object.entries(local.progress).some(
+        ([lvlId, rec]) =>
+          rec.status === "completed" &&
+          (!prog[lvlId] || prog[lvlId].status !== "completed" || (rec.stars || 0) > (prog[lvlId].stars || 0))
+      );
+
+      if (hasUnsyncedLocalProgress) {
+        try {
+          const syncSuccess = await syncGuestDataToOnline(currentUser.id, local);
+          if (syncSuccess) {
+            const [freshProf, freshProg] = await Promise.all([
+              fetchPlayerProfile(currentUser.id),
+              fetchPlayerProgress(currentUser.id),
+            ]);
+            if (freshProf) prof = freshProf;
+            if (freshProg) prog = freshProg;
+          }
+        } catch (syncErr) {
+          console.warn("Auto-sync progres lokal ke cloud dilewati:", syncErr);
+        }
+      }
+
       setProfile(prof);
       setProgress(prog);
 
       // Sinkronisasi data lokal jika ada profil/progres online yang lebih mutakhir
       if (prof) {
-        const local = getGuestData();
         const mergedProgress = { ...local.progress };
         for (const [lvlId, record] of Object.entries(prog)) {
           mergedProgress[lvlId] = {

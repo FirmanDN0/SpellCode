@@ -134,6 +134,9 @@ export function getGuestData(): GuestData {
 export function saveGuestData(data: GuestData): void {
   try {
     setStorageItem(STORAGE_KEY, JSON.stringify(data));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("spellcode_progress_updated"));
+    }
   } catch (e) {
     console.error("Gagal menyimpan ke LocalStorage:", e);
   }
@@ -197,6 +200,12 @@ export function saveLevelResult(
   }
   if (!updatedAchievements.includes("three_stars_perfection") && stars === 3) {
     updatedAchievements.push("three_stars_perfection");
+  }
+  if (!updatedAchievements.includes("loop_master") && levelId.startsWith("w2-")) {
+    updatedAchievements.push("loop_master");
+  }
+  if (!updatedAchievements.includes("condition_master") && levelId.startsWith("w3-")) {
+    updatedAchievements.push("condition_master");
   }
 
   const updatedData: GuestData = {

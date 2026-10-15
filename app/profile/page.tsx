@@ -51,9 +51,11 @@ export default function ProfilePage() {
     handleSyncState();
 
     window.addEventListener("spellcode_guest_reset", handleSyncState);
+    window.addEventListener("spellcode_progress_updated", handleSyncState);
     window.addEventListener("storage", handleSyncState);
     return () => {
       window.removeEventListener("spellcode_guest_reset", handleSyncState);
+      window.removeEventListener("spellcode_progress_updated", handleSyncState);
       window.removeEventListener("storage", handleSyncState);
     };
   }, [profile, isOnline]);
@@ -142,7 +144,44 @@ export default function ProfilePage() {
       desc: "Menyelesaikan misi World 2 menggunakan blok perulangan.",
       icon: "🔮",
     },
+    {
+      id: "condition_master",
+      title: "Pengendali Logika",
+      desc: "Menyelesaikan misi World 3 menggunakan sensor kondisi IF.",
+      icon: "☁️",
+    },
+    {
+      id: "grand_magus",
+      title: "Penakluk Realm",
+      desc: "Menyelesaikan seluruh 18 misi petualangan di Akademi SpellCode.",
+      icon: "👑",
+    },
   ];
+
+  const checkAchievementUnlocked = (id: string): boolean => {
+    if (guestData?.achievements?.includes(id)) return true;
+    if (id === "welcome_apprentice") return true;
+    if (id === "first_spell") {
+      return Object.values(effectiveProgress).some((p) => (p.stars || 0) >= 1);
+    }
+    if (id === "three_stars_perfection") {
+      return Object.values(effectiveProgress).some((p) => (p.stars || 0) === 3);
+    }
+    if (id === "loop_master") {
+      return Object.entries(effectiveProgress).some(
+        ([lvlId, p]) => lvlId.startsWith("w2-") && p.status === "completed"
+      );
+    }
+    if (id === "condition_master") {
+      return Object.entries(effectiveProgress).some(
+        ([lvlId, p]) => lvlId.startsWith("w3-") && p.status === "completed"
+      );
+    }
+    if (id === "grand_magus") {
+      return completedLevelsCount >= allLevels.length;
+    }
+    return false;
+  };
 
   return (
     <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 flex flex-col gap-8">
@@ -340,9 +379,9 @@ export default function ProfilePage() {
           <span>🏆 Lencana Prestasi Sihir</span>
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {allAchievements.map((ach) => {
-            const isUnlocked = guestData?.achievements.includes(ach.id);
+            const isUnlocked = checkAchievementUnlocked(ach.id);
             return (
               <div
                 key={ach.id}
