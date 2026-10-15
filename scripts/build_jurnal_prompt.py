@@ -219,7 +219,7 @@ def create_jurnal_prompt_doc():
     p_meta = doc.add_paragraph()
     p_meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_meta.paragraph_format.space_after = Pt(20)
-    r_m = p_meta.add_run("Peserta: Firman Dwi Nugraha | No. Peserta: 27 | Website: https://spell-code-nine.vercel.app/ | Repo: https://github.com/FirmanDN0/SpellCode")
+    r_m = p_meta.add_run("Peserta: Firman Dwi Nugraha | No. Peserta: 27 | Website: https://www.spellcode.my.id/ | Repo: https://github.com/FirmanDN0/SpellCode")
     r_m.font.size = Pt(9.5)
     r_m.font.color.rgb = COLOR_MUTED
 

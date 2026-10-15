@@ -2,7 +2,11 @@
 
 > **Akademi Sihir Pemrograman Interaktif untuk Generasi Muda (Usia 7-12 Tahun)**  
 > Belajar *Computational Thinking*, Algoritma, dan Logika Komputasi melalui Petualangan Meramu Mantra Sihir!
+>
+> 🌐 **Domain Resmi**: [https://www.spellcode.my.id/](https://www.spellcode.my.id/)  
+> 🔗 **Mirror Deployment (Vercel)**: [https://spell-code-nine.vercel.app/](https://spell-code-nine.vercel.app/)
 
+[![Live Website](https://img.shields.io/badge/Website-spellcode.my.id-8B5CF6?style=for-the-badge&logo=googlechrome&logoColor=white)](https://www.spellcode.my.id/)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.0-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
