@@ -179,7 +179,11 @@ describe("Server-Authoritative Progress & Reward Verification", () => {
     expect(nextOfW1L6).toBeDefined();
     expect(nextOfW1L6?.id).toBe("w2-l1"); // Transisi mulus dari World 1 ke World 2
 
-    const nextOfLast = getNextLevel("w2-l6");
-    expect(nextOfLast).toBeUndefined(); // Level terakhir tidak memiliki next
+    const nextOfW2L6 = getNextLevel("w2-l6");
+    expect(nextOfW2L6).toBeDefined();
+    expect(nextOfW2L6?.id).toBe("w3-l1"); // Transisi mulus dari World 2 ke World 3
+
+    const nextOfLast = getNextLevel("w3-l6");
+    expect(nextOfLast).toBeUndefined(); // Level terakhir World 3 tidak memiliki next
   });
 });

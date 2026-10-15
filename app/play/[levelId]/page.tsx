@@ -227,6 +227,83 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
     updateProgram({ ...program, nodes: updatedNodes });
   };
 
+  const handleAddSubCondition = (repeatId: string, condition: ConditionType = "IS_OBSTACLE_AHEAD") => {
+    const updatedNodes = program.nodes.map((node) => {
+      if (node.id === repeatId && node.type === "REPEAT") {
+        const repeatNode = node as RepeatNode;
+        const subIf = createIfNode(condition, []);
+        return { ...repeatNode, body: [...repeatNode.body, subIf] };
+      }
+      return node;
+    });
+    updateProgram({ ...program, nodes: updatedNodes });
+  };
+
+  const handleUpdateCondition = (nodeId: string, condition: ConditionType) => {
+    const updatedNodes = program.nodes.map((node) => {
+      if (node.id === nodeId && node.type === "IF") {
+        return { ...node, condition };
+      }
+      return node;
+    });
+    updateProgram({ ...program, nodes: updatedNodes });
+  };
+
+  const handleUpdateSubCondition = (repeatId: string, subIfId: string, condition: ConditionType) => {
+    const updatedNodes = program.nodes.map((node) => {
+      if (node.id === repeatId && node.type === "REPEAT") {
+        const repeatNode = node as RepeatNode;
+        const newBody = repeatNode.body.map((subNode) => {
+          if (subNode.id === subIfId && subNode.type === "IF") {
+            return { ...subNode, condition };
+          }
+          return subNode;
+        });
+        return { ...repeatNode, body: newBody };
+      }
+      return node;
+    });
+    updateProgram({ ...program, nodes: updatedNodes });
+  };
+
+  const handleAddSubIfAction = (repeatId: string, subIfId: string, command: CommandType) => {
+    const updatedNodes = program.nodes.map((node) => {
+      if (node.id === repeatId && node.type === "REPEAT") {
+        const repeatNode = node as RepeatNode;
+        const newBody = repeatNode.body.map((subNode) => {
+          if (subNode.id === subIfId && subNode.type === "IF") {
+            const ifNode = subNode as IfNode;
+            return { ...ifNode, thenBody: [...ifNode.thenBody, createActionNode(command)] };
+          }
+          return subNode;
+        });
+        return { ...repeatNode, body: newBody };
+      }
+      return node;
+    });
+    updateProgram({ ...program, nodes: updatedNodes });
+  };
+
+  const handleRemoveSubIfAction = (repeatId: string, subIfId: string, actionIndex: number) => {
+    const updatedNodes = program.nodes.map((node) => {
+      if (node.id === repeatId && node.type === "REPEAT") {
+        const repeatNode = node as RepeatNode;
+        const newBody = repeatNode.body.map((subNode) => {
+          if (subNode.id === subIfId && subNode.type === "IF") {
+            const ifNode = subNode as IfNode;
+            const newThen = [...ifNode.thenBody];
+            newThen.splice(actionIndex, 1);
+            return { ...ifNode, thenBody: newThen };
+          }
+          return subNode;
+        });
+        return { ...repeatNode, body: newBody };
+      }
+      return node;
+    });
+    updateProgram({ ...program, nodes: updatedNodes });
+  };
+
   const playSoundForCommand = (command?: CommandType) => {
     if (command === "STEP_FORWARD") soundManager.playStep();
     else if (command === "TURN_LEFT" || command === "TURN_RIGHT") soundManager.playTurn();
@@ -466,6 +543,12 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
               onRemoveSubAction={handleRemoveSubAction}
               allowedRunes={level.allowedRunes}
               disabled={isRunning}
+              allowCondition={level.allowConditionRune}
+              onAddSubCondition={handleAddSubCondition}
+              onUpdateCondition={handleUpdateCondition}
+              onUpdateSubCondition={handleUpdateSubCondition}
+              onAddSubIfAction={handleAddSubIfAction}
+              onRemoveSubIfAction={handleRemoveSubIfAction}
             />
 
             <BlockTray

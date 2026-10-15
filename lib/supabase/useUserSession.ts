@@ -5,7 +5,7 @@ import { User } from "@supabase/supabase-js";
 import { createClient } from "./client";
 import { ProfileRow, PlayerProgressRow } from "./types";
 import { fetchPlayerProfile, fetchPlayerProgress } from "./repository";
-import { getGuestData, saveGuestData } from "../storage/guestStorage";
+import { getGuestData, saveGuestData, resetGuestDataToDefault } from "../storage/guestStorage";
 
 export interface UserSessionState {
   user: User | null;
@@ -46,6 +46,8 @@ export function useUserSession(): UserSessionState {
             totalXp: prof.total_xp,
             wizardRank: prof.wizard_rank,
             activeFamiliarId: prof.active_familiar_id,
+            syncedCloudUserId: currentUser.id,
+            syncedCloudEmail: currentUser.email || undefined,
           },
         });
       }
@@ -67,6 +69,11 @@ export function useUserSession(): UserSessionState {
       } else {
         setProfile(null);
         setProgress({});
+        // Jika tidak ada akun online yang aktif, pastikan residu akun email dibersihkan
+        const local = getGuestData();
+        if (local.profile.syncedCloudUserId || local.profile.displayName === "FirmanDN") {
+          resetGuestDataToDefault();
+        }
       }
     } finally {
       setIsLoading(false);
@@ -79,12 +86,15 @@ export function useUserSession(): UserSessionState {
     // Listen auth state changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       const currentUser = session?.user || null;
       setUser(currentUser);
       if (currentUser) {
         await loadUserData(currentUser);
       } else {
+        if (event === "SIGNED_OUT") {
+          resetGuestDataToDefault();
+        }
         setProfile(null);
         setProgress({});
       }
@@ -105,6 +115,9 @@ export function useUserSession(): UserSessionState {
     } catch (e) {
       console.warn("Sign out server call warning:", e);
     } finally {
+      // PENTING: Bersihkan data tamu lokal kembali ke akun tamu baru (fresh guest).
+      // Data akun online pengguna tetap tersimpan aman di cloud Supabase.
+      resetGuestDataToDefault();
       setUser(null);
       setProfile(null);
       setProgress({});

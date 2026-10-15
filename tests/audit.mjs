@@ -39,7 +39,8 @@ async function runAudit() {
     });
 
     for (const route of routes) {
-      const url = `http://localhost:3000${route.path}`;
+      const baseUrl = process.env.TEST_BASE_URL || "http://localhost:3000";
+      const url = `${baseUrl}${route.path}`;
       const errors = [];
       const warnings = [];
 

@@ -108,4 +108,44 @@ describe("Engine: Loops (Repeat) and Safe Execution Limits", () => {
     expect(validation.warnings.length).toBeGreaterThan(0);
     expect(validation.warnings[0]).toContain("tidak memiliki instruksi di dalamnya");
   });
+
+  it("executes conditional IF nested inside REPEAT body correctly", () => {
+    // Arena dengan rintangan di petak (1, 0)
+    const obstacleArena = {
+      width: 5,
+      height: 5,
+      obstacles: [{ x: 1, y: 0 }],
+      shards: [],
+      torches: [],
+      portal: { x: 0, y: 1 },
+      playerStart: { x: 0, y: 0, direction: "RIGHT" as const },
+    };
+
+    // Ulangi 2 kali: JIKA rintangan di depan -> belok kanan, lalu maju
+    const program: SpellProgram = {
+      version: 1,
+      nodes: [
+        createRepeatNode(
+          1,
+          [
+            {
+              id: "nested-if",
+              type: "IF",
+              condition: "IS_OBSTACLE_AHEAD",
+              thenBody: [createActionNode("TURN_RIGHT", "turn-right-action")],
+            },
+            createActionNode("STEP_FORWARD", "step-forward-action"),
+          ],
+          "loop-with-if"
+        ),
+      ],
+    };
+
+    const state = createInitialGridState(obstacleArena);
+    const result = runSpellProgram(program, state, 2);
+
+    expect(result.status).toBe("VICTORY");
+    expect(result.finalState.player.direction).toBe("DOWN");
+    expect(result.finalState.player.position).toEqual({ x: 0, y: 1 });
+  });
 });

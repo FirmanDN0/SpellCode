@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionNode, AstNode, CommandType, RepeatNode, IfNode } from "@/lib/engine/types";
+import { ActionNode, AstNode, CommandType, RepeatNode, IfNode, ConditionType } from "@/lib/engine/types";
 import {
   ArrowUp,
   RotateCcw,
@@ -15,6 +15,7 @@ import {
   ChevronUp,
   ChevronDown,
   Sparkles,
+  HelpCircle,
 } from "lucide-react";
 import { soundManager } from "@/lib/audio/soundManager";
 import { Badge } from "@/components/ui/Badge";
@@ -32,6 +33,12 @@ interface SpellDeckProps {
   onRemoveSubAction?: (repeatId: string, subIndex: number) => void;
   allowedRunes?: CommandType[];
   disabled?: boolean;
+  allowCondition?: boolean;
+  onAddSubCondition?: (repeatId: string, condition?: ConditionType) => void;
+  onUpdateCondition?: (nodeId: string, condition: ConditionType) => void;
+  onUpdateSubCondition?: (repeatId: string, subIfId: string, condition: ConditionType) => void;
+  onAddSubIfAction?: (repeatId: string, subIfId: string, command: CommandType) => void;
+  onRemoveSubIfAction?: (repeatId: string, subIfId: string, actionIndex: number) => void;
 }
 
 export function SpellDeck({
@@ -47,6 +54,12 @@ export function SpellDeck({
   onRemoveSubAction,
   allowedRunes = ["STEP_FORWARD", "TURN_LEFT", "TURN_RIGHT"],
   disabled = false,
+  allowCondition = false,
+  onAddSubCondition,
+  onUpdateCondition,
+  onUpdateSubCondition,
+  onAddSubIfAction,
+  onRemoveSubIfAction,
 }: SpellDeckProps) {
   const getCommandInfo = (command: CommandType) => {
     switch (command) {
@@ -326,51 +339,171 @@ export function SpellDeck({
                       </p>
                     ) : (
                       repeatNode.body.map((subNode, subIdx) => {
-                        const isSubActive = activeNodeId === subNode.id;
-                        const subAction = subNode as ActionNode;
-                        const info = getCommandInfo(subAction.command);
-                        const Icon = info.icon;
+                        if (subNode.type === "ACTION") {
+                          const isSubActive = activeNodeId === subNode.id;
+                          const subAction = subNode as ActionNode;
+                          const info = getCommandInfo(subAction.command);
+                          const Icon = info.icon;
+                          const isSubMisfire = misfireNodeId === subNode.id;
 
-                        const isSubMisfire = misfireNodeId === subNode.id;
+                          return (
+                            <div
+                              key={subNode.id}
+                              className={`flex items-center justify-between px-2.5 py-1.5 rounded-md border text-xs font-bold transition-all ${
+                                info.bg
+                              } ${
+                                isSubActive
+                                  ? "ring-2 ring-spell-gold-400 shadow-glow-gold scale-[1.02]"
+                                  : isSubMisfire
+                                  ? "ring-2 ring-spell-coral-400 bg-spell-coral-950/80 border-spell-coral-500 animate-pulse"
+                                  : ""
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Icon className="w-3.5 h-3.5 text-spell-gold-300" />
+                                <span className="text-white">{info.label}</span>
+                              </div>
 
-                        return (
-                          <div
-                            key={subNode.id}
-                            className={`flex items-center justify-between px-2.5 py-1.5 rounded-md border text-xs font-bold transition-all ${
-                              info.bg
-                            } ${
-                              isSubActive
-                                ? "ring-2 ring-spell-gold-400 shadow-glow-gold scale-[1.02]"
-                                : isSubMisfire
-                                ? "ring-2 ring-spell-coral-400 bg-spell-coral-950/80 border-spell-coral-500 animate-pulse"
-                                : ""
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <Icon className="w-3.5 h-3.5 text-spell-gold-300" />
-                              <span className="text-white">{info.label}</span>
+                              {onRemoveSubAction && (
+                                <button
+                                  type="button"
+                                  disabled={disabled}
+                                  onClick={() => onRemoveSubAction(node.id, subIdx)}
+                                  className="text-spell-purple-400 hover:text-spell-coral-400"
+                                  aria-label={`Hapus sub-aksi ${subIdx + 1}`}
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                             </div>
+                          );
+                        }
 
-                            {onRemoveSubAction && (
-                              <button
-                                type="button"
-                                disabled={disabled}
-                                onClick={() => onRemoveSubAction(node.id, subIdx)}
-                                className="text-spell-purple-400 hover:text-spell-coral-400"
-                                aria-label={`Hapus sub-aksi ${subIdx + 1}`}
-                              >
-                                <X className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                          </div>
-                        );
+                        if (subNode.type === "IF") {
+                          const subIf = subNode as IfNode;
+                          const isSubIfActive = activeNodeId === subIf.id;
+                          const isSubIfMisfire = misfireNodeId === subIf.id;
+
+                          return (
+                            <div
+                              key={subIf.id}
+                              className={`p-2.5 rounded-lg border-2 border-dashed border-cyan-500/80 bg-cyan-950/40 flex flex-col gap-2 my-1 transition-all ${
+                                isSubIfActive
+                                  ? "ring-2 ring-cyan-400 bg-cyan-950/60 shadow-glow-cyan"
+                                  : isSubIfMisfire
+                                  ? "ring-2 ring-spell-coral-400 bg-spell-coral-950/70 border-spell-coral-500 animate-pulse"
+                                  : ""
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="text-xs font-extrabold text-cyan-300">JIKA:</span>
+                                  <select
+                                    disabled={disabled}
+                                    value={subIf.condition}
+                                    onChange={(e) =>
+                                      onUpdateSubCondition?.(node.id, subIf.id, e.target.value as ConditionType)
+                                    }
+                                    className="bg-cyan-900 border border-cyan-600 text-cyan-100 text-[11px] rounded px-1.5 py-0.5 font-bold focus:outline-none focus:ring-1 focus:ring-cyan-400"
+                                  >
+                                    <option value="IS_OBSTACLE_AHEAD">Ada Rintangan di Depan</option>
+                                    <option value="IS_CLEAR_AHEAD">Jalan Terbuka di Depan</option>
+                                    <option value="IS_SHARD_PRESENT">Ada Kristal di Kotak Ini</option>
+                                    <option value="IS_TORCH_PRESENT">Ada Lentera di Kotak Ini</option>
+                                    <option value="IS_PORTAL_PRESENT">Ada Gerbang di Kotak Ini</option>
+                                  </select>
+                                </div>
+
+                                {onRemoveSubAction && (
+                                  <button
+                                    type="button"
+                                    disabled={disabled}
+                                    onClick={() => onRemoveSubAction(node.id, subIdx)}
+                                    className="p-1 text-spell-purple-400 hover:text-spell-coral-400"
+                                    aria-label="Hapus blok jika bersarang"
+                                    title="Hapus blok jika bersarang"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+
+                              {/* Cabang Maka di dalam Sub-If */}
+                              <div className="pl-4 flex flex-col gap-1 border-l-2 border-cyan-500/50">
+                                <span className="text-[10px] font-bold text-cyan-400">Maka:</span>
+                                {subIf.thenBody.length === 0 ? (
+                                  <p className="text-[11px] text-cyan-300/60 italic">Belum ada aksi</p>
+                                ) : (
+                                  subIf.thenBody.map((thenNode, thenIdx) => {
+                                    if (thenNode.type !== "ACTION") return null;
+                                    const thenAction = thenNode as ActionNode;
+                                    const info = getCommandInfo(thenAction.command);
+                                    const Icon = info.icon;
+                                    const isThenActive = activeNodeId === thenNode.id;
+                                    const isThenMisfire = misfireNodeId === thenNode.id;
+
+                                    return (
+                                      <div
+                                        key={thenNode.id}
+                                        className={`flex items-center justify-between px-2 py-1 rounded border text-[11px] font-bold ${
+                                          info.bg
+                                        } ${
+                                          isThenActive
+                                            ? "ring-2 ring-cyan-400 shadow-glow-cyan"
+                                            : isThenMisfire
+                                            ? "ring-2 ring-spell-coral-400 bg-spell-coral-950/80 border-spell-coral-500"
+                                            : ""
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-1.5">
+                                          <Icon className="w-3 h-3 text-spell-gold-300" />
+                                          <span className="text-white">{info.label}</span>
+                                        </div>
+                                        {onRemoveSubIfAction && (
+                                          <button
+                                            type="button"
+                                            disabled={disabled}
+                                            onClick={() => onRemoveSubIfAction(node.id, subIf.id, thenIdx)}
+                                            className="text-spell-purple-400 hover:text-spell-coral-400"
+                                            aria-label="Hapus aksi syarat"
+                                          >
+                                            <X className="w-3 h-3" />
+                                          </button>
+                                        )}
+                                      </div>
+                                    );
+                                  })
+                                )}
+
+                                {/* Tombol aksi cepat untuk sub-IF */}
+                                {onAddSubIfAction && (
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {allowedRunes.map((cmd) => (
+                                      <button
+                                        key={cmd}
+                                        type="button"
+                                        disabled={disabled}
+                                        onClick={() => onAddSubIfAction(node.id, subIf.id, cmd)}
+                                        className="px-1.5 py-0.5 rounded bg-cyan-900/90 hover:bg-cyan-800 text-[10px] font-bold text-cyan-200 border border-cyan-700/60 transition-colors disabled:opacity-40"
+                                      >
+                                        + {cmd === "STEP_FORWARD" ? "Maju" : cmd === "TURN_LEFT" ? "Kiri" : cmd === "TURN_RIGHT" ? "Kanan" : cmd}
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        return null;
                       })
                     )}
 
                     {/* Quick Add Sub Action Buttons */}
-                    {onAddSubAction && (
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {allowedRunes.map((cmd) => (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {onAddSubAction &&
+                        allowedRunes.map((cmd) => (
                           <button
                             key={cmd}
                             type="button"
@@ -381,8 +514,19 @@ export function SpellDeck({
                             + {cmd === "STEP_FORWARD" ? "Maju" : cmd === "TURN_LEFT" ? "Kiri" : cmd === "TURN_RIGHT" ? "Kanan" : cmd}
                           </button>
                         ))}
-                      </div>
-                    )}
+
+                      {allowCondition && onAddSubCondition && (
+                        <button
+                          type="button"
+                          disabled={disabled}
+                          onClick={() => onAddSubCondition(node.id, "IS_OBSTACLE_AHEAD")}
+                          className="px-2 py-1 rounded bg-cyan-900 hover:bg-cyan-800 text-[11px] font-bold text-cyan-200 border border-cyan-500 shadow-sm transition-colors disabled:opacity-40 flex items-center gap-1"
+                        >
+                          <HelpCircle className="w-3.5 h-3.5 text-cyan-300" />
+                          <span>+ Jika (Kondisi)</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
@@ -390,13 +534,6 @@ export function SpellDeck({
 
             if (node.type === "IF") {
               const ifNode = node as IfNode;
-              const condLabels: Record<string, string> = {
-                IS_OBSTACLE_AHEAD: "Ada Rintangan di Depan",
-                IS_CLEAR_AHEAD: "Jalan Terbuka di Depan",
-                IS_SHARD_PRESENT: "Ada Kristal di Kotak Ini",
-                IS_TORCH_PRESENT: "Ada Lentera di Kotak Ini",
-                IS_PORTAL_PRESENT: "Ada Gerbang di Kotak Ini",
-              };
 
               return (
                 <div
@@ -415,8 +552,22 @@ export function SpellDeck({
                         {index + 1}
                       </span>
                       <span className="text-sm font-extrabold text-cyan-300">
-                        JIKA ({condLabels[ifNode.condition] || ifNode.condition}):
+                        JIKA:
                       </span>
+                      <select
+                        disabled={disabled}
+                        value={ifNode.condition}
+                        onChange={(e) =>
+                          onUpdateCondition?.(node.id, e.target.value as ConditionType)
+                        }
+                        className="bg-cyan-900 border border-cyan-600 text-cyan-100 text-xs rounded px-2 py-1 font-bold focus:outline-none focus:ring-1 focus:ring-cyan-400"
+                      >
+                        <option value="IS_OBSTACLE_AHEAD">Ada Rintangan di Depan</option>
+                        <option value="IS_CLEAR_AHEAD">Jalan Terbuka di Depan</option>
+                        <option value="IS_SHARD_PRESENT">Ada Kristal di Kotak Ini</option>
+                        <option value="IS_TORCH_PRESENT">Ada Lentera di Kotak Ini</option>
+                        <option value="IS_PORTAL_PRESENT">Ada Gerbang di Kotak Ini</option>
+                      </select>
                     </div>
 
                     <div className="flex items-center gap-1.5">

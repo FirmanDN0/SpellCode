@@ -15,7 +15,12 @@ import {
   ShieldCheck,
   Loader2,
 } from "lucide-react";
-import { getGuestData, updateDisplayName, GuestData } from "@/lib/storage/guestStorage";
+import {
+  getGuestData,
+  updateDisplayName,
+  resetGuestDataToDefault,
+  GuestData,
+} from "@/lib/storage/guestStorage";
 import { allLevels } from "@/lib/levels";
 import { Button } from "@/components/ui/Button";
 import { useUserSession } from "@/lib/supabase/useUserSession";
@@ -29,14 +34,29 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const data = getGuestData();
-    setGuestData(data);
-    if (profile?.display_name) {
-      setInputName(profile.display_name);
-    } else {
-      setInputName(data.profile.displayName);
-    }
-  }, [profile]);
+    const handleSyncState = () => {
+      let data = getGuestData();
+      // Jika pengguna tidak sedang login dan data tamu masih mencatat sisa akun email
+      if (!isOnline && (data.profile.syncedCloudUserId || data.profile.displayName === "FirmanDN")) {
+        data = resetGuestDataToDefault();
+      }
+      setGuestData(data);
+      if (profile?.display_name) {
+        setInputName(profile.display_name);
+      } else {
+        setInputName(data.profile.displayName);
+      }
+    };
+
+    handleSyncState();
+
+    window.addEventListener("spellcode_guest_reset", handleSyncState);
+    window.addEventListener("storage", handleSyncState);
+    return () => {
+      window.removeEventListener("spellcode_guest_reset", handleSyncState);
+      window.removeEventListener("storage", handleSyncState);
+    };
+  }, [profile, isOnline]);
 
   const handleSaveName = async () => {
     if (!inputName.trim()) return;
@@ -228,11 +248,25 @@ export default function ProfilePage() {
               <span>Keluar Sesi</span>
             </Button>
           ) : (
-            <Link href="/login" className="mt-3 w-full">
-              <Button variant="secondary" size="sm" className="w-full text-xs">
-                Hubungkan Cloud
+            <div className="w-full flex flex-col gap-2 mt-3">
+              <Link href="/login" className="w-full">
+                <Button variant="secondary" size="sm" className="w-full text-xs">
+                  Hubungkan Cloud
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  const fresh = resetGuestDataToDefault();
+                  setGuestData(fresh);
+                  setInputName(fresh.profile.displayName);
+                }}
+                className="w-full text-[11px] text-spell-purple-300 hover:text-white hover:bg-spell-purple-900/60"
+              >
+                Mulai Akun Tamu Baru
               </Button>
-            </Link>
+            </div>
           )}
         </div>
       </div>

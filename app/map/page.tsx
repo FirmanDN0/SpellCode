@@ -24,7 +24,7 @@ import { useUserSession } from "@/lib/supabase/useUserSession";
 import { Button, Badge, Card, Modal, ProgressBar } from "@/components/ui";
 
 export default function WorldMapPage() {
-  const [selectedWorld, setSelectedWorld] = useState<1 | 2>(1);
+  const [selectedWorld, setSelectedWorld] = useState<1 | 2 | 3>(1);
   const [guestData, setGuestData] = useState<GuestData | null>(null);
   const { user, profile, progress: onlineProgress, isLoading: isAuthLoading } = useUserSession();
 
@@ -39,7 +39,16 @@ export default function WorldMapPage() {
   });
 
   useEffect(() => {
-    setGuestData(getGuestData());
+    const handleStorageChange = () => {
+      setGuestData(getGuestData());
+    };
+    handleStorageChange();
+    window.addEventListener("spellcode_guest_reset", handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("spellcode_guest_reset", handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, []);
 
   // Gabungkan data online Supabase dengan data lokal
@@ -83,15 +92,30 @@ export default function WorldMapPage() {
     (sum, item) => sum + item.stars,
     0
   );
+  const world2Stars = getLevelNodeStates(2, effectiveData).reduce(
+    (sum, item) => sum + item.stars,
+    0
+  );
   const isWorld2Unlocked = world1Stars >= 8 || Boolean(effectiveData?.progress["w2-l1"]);
+  const isWorld3Unlocked =
+    world1Stars + world2Stars >= 16 || Boolean(effectiveData?.progress["w3-l1"]);
 
-  const handleWorldSwitch = (worldNum: 1 | 2) => {
+  const handleWorldSwitch = (worldNum: 1 | 2 | 3) => {
     if (worldNum === 2 && !isWorld2Unlocked) {
       setLockedModal({
         isOpen: true,
         title: "World 2 Masih Disegel Kabut Kristal!",
         description:
           "Untuk melangkah ke Crystal Caverns, kamu harus mengumpulkan minimal 8 Bintang Sihir di World 1 (Whispering Woods). Ayo selesaikan misi sebelumnya dengan mantap!",
+      });
+      return;
+    }
+    if (worldNum === 3 && !isWorld3Unlocked) {
+      setLockedModal({
+        isOpen: true,
+        title: "World 3 Masih Diselimuti Badai Awan!",
+        description:
+          "Untuk mendaki ke Cloud Citadel (Benteng Awan), kamu harus mengumpulkan minimal 16 Bintang Sihir dari gabungan World 1 dan World 2. Terus asah mantramu!",
       });
       return;
     }
@@ -124,11 +148,11 @@ export default function WorldMapPage() {
         </div>
 
         {/* Tab Pemilihan World */}
-        <div className="flex items-center p-1.5 rounded-rune bg-spell-purple-900 border border-spell-purple-700/80 shadow-inner">
+        <div className="flex items-center p-1.5 rounded-rune bg-spell-purple-900 border border-spell-purple-700/80 shadow-inner flex-wrap gap-1">
           <button
             type="button"
             onClick={() => handleWorldSwitch(1)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${selectedWorld === 1
+            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${selectedWorld === 1
                 ? "bg-spell-purple-700 text-white shadow-rune-purple border border-spell-purple-500/50"
                 : "text-spell-purple-300 hover:text-white"
               }`}
@@ -139,13 +163,29 @@ export default function WorldMapPage() {
           <button
             type="button"
             onClick={() => handleWorldSwitch(2)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${selectedWorld === 2
+            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${selectedWorld === 2
                 ? "bg-spell-teal-700 text-white shadow-rune-teal border border-spell-teal-500/50"
                 : "text-spell-purple-300 hover:text-white"
               }`}
           >
             <span>💎 World 2: Gua Kristal</span>
             {!isWorld2Unlocked && (
+              <span className="p-1 rounded-full bg-spell-coral-500/20 text-spell-coral-400">
+                <Lock className="w-3 h-3" />
+              </span>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleWorldSwitch(3)}
+            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${selectedWorld === 3
+                ? "bg-spell-gold-500 text-spell-purple-950 font-black shadow-rune-gold border border-spell-gold-400"
+                : "text-spell-purple-300 hover:text-white"
+              }`}
+          >
+            <span>☁️ World 3: Benteng Awan</span>
+            {!isWorld3Unlocked && (
               <span className="p-1 rounded-full bg-spell-coral-500/20 text-spell-coral-400">
                 <Lock className="w-3 h-3" />
               </span>
@@ -158,21 +198,34 @@ export default function WorldMapPage() {
       <div className="my-6 p-5 sm:p-6 rounded-card bg-gradient-to-r from-spell-purple-900/90 via-spell-purple-950 to-spell-purple-900/90 border border-spell-purple-700/80 shadow-card-fantasy flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-spell-purple-800 border border-spell-purple-600/60 flex items-center justify-center text-3xl shadow-md">
-            {selectedWorld === 1 ? "🌲" : "💎"}
+            {selectedWorld === 1 ? "🌲" : selectedWorld === 2 ? "💎" : "☁️"}
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-lg sm:text-xl font-black text-white">
-                {selectedWorld === 1 ? "World 1: Whispering Woods" : "World 2: Crystal Caverns"}
+                {selectedWorld === 1
+                  ? "World 1: Whispering Woods"
+                  : selectedWorld === 2
+                  ? "World 2: Crystal Caverns"
+                  : "World 3: Cloud Citadel"}
               </h2>
-              <Badge variant={selectedWorld === 1 ? "purple" : "teal"} size="sm">
-                {selectedWorld === 1 ? "Sekuensial" : "Perulangan (Loops)"}
+              <Badge
+                variant={selectedWorld === 1 ? "purple" : selectedWorld === 2 ? "teal" : "gold"}
+                size="sm"
+              >
+                {selectedWorld === 1
+                  ? "Sekuensial"
+                  : selectedWorld === 2
+                  ? "Perulangan (Loops)"
+                  : "Kondisi Percabangan (Conditionals)"}
               </Badge>
             </div>
             <p className="text-xs sm:text-sm text-spell-purple-300 mt-1">
               {selectedWorld === 1
                 ? "Fokus: Menyusun urutan langkah runtun tanpa melewatkan petak instruksi (8 Level)."
-                : "Fokus: Mengidentifikasi pola berulang dan membungkusnya dalam satu loop efisien (7 Level)."}
+                : selectedWorld === 2
+                ? "Fokus: Mengidentifikasi pola berulang dan membungkusnya dalam satu loop efisien (7 Level)."
+                : "Fokus: Mengambil keputusan cerdas dengan sensor kondisi IF dan aksi adaptif (6 Level)."}
             </p>
           </div>
         </div>

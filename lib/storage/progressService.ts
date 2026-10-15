@@ -1,6 +1,7 @@
 import { LevelDefinition } from "../levels/types";
 import { world1Levels } from "../levels/world1";
 import { world2Levels } from "../levels/world2";
+import { world3Levels } from "../levels/world3";
 import { allLevels, getLevelById } from "../levels";
 import { GuestData, getGuestData } from "./guestStorage";
 
@@ -24,6 +25,7 @@ export interface PlayerProgressSummary {
   totalXp: number;
   rank: string;
   isWorld2Unlocked: boolean;
+  isWorld3Unlocked: boolean;
   isPersistenceLocal: boolean;
 }
 
@@ -32,17 +34,29 @@ export interface PlayerProgressSummary {
  * Fungsi ini memisahkan data persistence dari layer presentasi UI.
  */
 export function getLevelNodeStates(
-  worldNumber: 1 | 2,
+  worldNumber: 1 | 2 | 3,
   guestData: GuestData | null
 ): LevelNodeState[] {
   const data = guestData || getGuestData();
-  const levels = worldNumber === 1 ? world1Levels : world2Levels;
+  const levels =
+    worldNumber === 1
+      ? world1Levels
+      : worldNumber === 2
+      ? world2Levels
+      : world3Levels;
 
   const world1Stars = world1Levels.reduce(
     (sum, lvl) => sum + (data.progress[lvl.id]?.stars || 0),
     0
   );
   const isWorld2Unlocked = world1Stars >= 8 || Boolean(data.progress["w2-l1"]);
+
+  const world2Stars = world2Levels.reduce(
+    (sum, lvl) => sum + (data.progress[lvl.id]?.stars || 0),
+    0
+  );
+  const isWorld3Unlocked =
+    world1Stars + world2Stars >= 16 || Boolean(data.progress["w3-l1"]);
 
   let foundCurrent = false;
 
@@ -58,7 +72,13 @@ export function getLevelNodeStates(
     // Kalkulasi Prasyarat
     if (worldNumber === 2 && !isWorld2Unlocked) {
       prerequisiteText = "Kumpulkan minimal 8 Bintang di World 1 untuk membuka Realm ini";
-    } else if (level.id === "w1-l1" || (level.id === "w2-l1" && isWorld2Unlocked)) {
+    } else if (worldNumber === 3 && !isWorld3Unlocked) {
+      prerequisiteText = "Kumpulkan minimal 16 Bintang di World 1 & 2 untuk membuka Realm ini";
+    } else if (
+      level.id === "w1-l1" ||
+      (level.id === "w2-l1" && isWorld2Unlocked) ||
+      (level.id === "w3-l1" && isWorld3Unlocked)
+    ) {
       prerequisiteText = "Tersedia sejak awal untuk petualang cilik";
       canPlay = true;
     } else {
@@ -121,6 +141,13 @@ export function getPlayerProgressSummary(guestData: GuestData | null): PlayerPro
   );
   const isWorld2Unlocked = world1Stars >= 8 || Boolean(data.progress["w2-l1"]);
 
+  const world2Stars = world2Levels.reduce(
+    (sum, lvl) => sum + (data.progress[lvl.id]?.stars || 0),
+    0
+  );
+  const isWorld3Unlocked =
+    world1Stars + world2Stars >= 16 || Boolean(data.progress["w3-l1"]);
+
   // Cari level yang sedang aktif dikerjakan
   let currentLevel: LevelDefinition = allLevels[0];
 
@@ -128,6 +155,9 @@ export function getPlayerProgressSummary(guestData: GuestData | null): PlayerPro
   for (const lvl of allLevels) {
     const rec = data.progress[lvl.id];
     if (lvl.worldNumber === 2 && !isWorld2Unlocked) {
+      break;
+    }
+    if (lvl.worldNumber === 3 && !isWorld3Unlocked) {
       break;
     }
     if (!rec || rec.status !== "completed") {
@@ -150,6 +180,7 @@ export function getPlayerProgressSummary(guestData: GuestData | null): PlayerPro
     totalXp: data.profile.totalXp,
     rank: data.profile.wizardRank,
     isWorld2Unlocked,
+    isWorld3Unlocked,
     isPersistenceLocal: true, // Saat ini disimpan di LocalStorage perangkat lokal
   };
 }

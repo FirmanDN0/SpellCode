@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Button, Input } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
-import { getGuestData } from "@/lib/storage/guestStorage";
+import { getGuestData, resetGuestDataToDefault } from "@/lib/storage/guestStorage";
 import { syncGuestDataToOnline } from "@/lib/supabase/repository";
 import {
   validateEmail,
@@ -78,6 +78,12 @@ function LoginContent() {
       : urlMessage === "auth_required"
       ? "Masuk atau buat akun terlebih dahulu untuk melanjutkan petualangan ini!"
       : null;
+
+  React.useEffect(() => {
+    if (urlMessage === "logged_out") {
+      resetGuestDataToDefault();
+    }
+  }, [urlMessage]);
 
   const handlePostAuthSuccess = async (userId: string) => {
     // Sinkronkan progres lokal jika ada

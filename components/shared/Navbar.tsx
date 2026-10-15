@@ -22,7 +22,11 @@ export function Navbar() {
       setGuestData(getGuestData());
     };
     window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    window.addEventListener("spellcode_guest_reset", handleStorage);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("spellcode_guest_reset", handleStorage);
+    };
   }, [pathname]);
 
   const totalStars = guestData

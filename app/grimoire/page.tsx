@@ -93,8 +93,8 @@ export default function GrimoirePage() {
         "Penyihir hanya menyerap mana saat benar-benar berdiri di atas kristal bersinar, menghemat energi mantra tanpa ada langkah sia-sia.",
       debugTip:
         "Pastikan kondisi yang kamu tanyakan jelas. Komputer hanya mengenal jawaban pasti: Benar (True) atau Salah (False).",
-      practiceLevelId: null,
-      practiceLevelTitle: "Tantangan Lanjutan World 3",
+      practiceLevelId: "w3-l1",
+      practiceLevelTitle: "Level 1: Sensor Jurang Awan",
     },
     {
       id: "debugging",

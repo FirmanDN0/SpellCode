@@ -8,6 +8,8 @@ export interface GuestProfile {
   totalXp: number;
   wizardRank: string;
   activeFamiliarId: string;
+  syncedCloudUserId?: string;
+  syncedCloudEmail?: string;
 }
 
 export interface LevelProgressRecord {
@@ -67,6 +69,20 @@ export function resetStorageForTesting(): void {
       localStorage.clear();
     } catch {}
   }
+}
+
+/**
+ * Mereset data akun tamu di browser kembali ke akun baru yang segar (defaultInitialGuestData).
+ * Dipanggil saat pengguna keluar dari akun cloud (logout) atau ingin memulai ulang profil tamu lokal.
+ */
+export function resetGuestDataToDefault(): GuestData {
+  const freshData: GuestData = JSON.parse(JSON.stringify(defaultInitialGuestData));
+  saveGuestData(freshData);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("spellcode_guest_reset"));
+    window.dispatchEvent(new Event("storage"));
+  }
+  return freshData;
 }
 
 function getStorageItem(key: string): string | null {

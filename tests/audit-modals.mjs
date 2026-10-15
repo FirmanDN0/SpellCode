@@ -8,9 +8,11 @@ async function testModalAndGameplay() {
     viewport: { width: 360, height: 740 },
   });
 
+  const baseUrl = process.env.TEST_BASE_URL || "http://localhost:3000";
+
   // 1. Uji Modal di World Map (Locked Level Modal)
   console.log("1. Menguji Modal Dialog pada Layar 360px di /map...");
-  await page.goto("http://localhost:3000/map", { waitUntil: "domcontentloaded" });
+  await page.goto(`${baseUrl}/map`, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(500);
 
   // Klik World 2 yang terkunci
@@ -47,18 +49,16 @@ async function testModalAndGameplay() {
 
   // 2. Uji Interaktivitas Gameplay di /play/w1-l1
   console.log("\n2. Menguji Interaksi Gameplay di /play/w1-l1 pada Layar 360px...");
-  await page.goto("http://localhost:3000/play/w1-l1", { waitUntil: "domcontentloaded" });
+  await page.goto(`${baseUrl}/play/w1-l1`, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(500);
 
-  // Cek tombol rune di rak
+  // Cek tombol rune di rak dan tambahkan 3 balok Maju untuk menyelesaikan w1-l1
   const addStepBtn = page.locator("button:has-text('Maju 1 Langkah')").first();
   await addStepBtn.click();
   await page.waitForTimeout(200);
   await addStepBtn.click();
   await page.waitForTimeout(200);
-
-  const addTorchBtn = page.locator("button:has-text('Nyalakan Lentera')").first();
-  await addTorchBtn.click();
+  await addStepBtn.click();
   await page.waitForTimeout(200);
 
   // Cek jumlah blok di meja mantra
@@ -67,7 +67,7 @@ async function testModalAndGameplay() {
   if (!has3Blocks) {
     throw new Error("Balok instruksi tidak bertambah di meja mantra!");
   }
-  console.log("   ✓ Berhasil menyusun 3 blok mantra (Maju, Maju, Nyalakan Lentera).");
+  console.log("   ✓ Berhasil menyusun 3 blok mantra (Maju, Maju, Maju).");
 
   // Klik tombol Rapalkan Mantra
   const runBtn = page.locator("button:has-text('Rapalkan Mantra')");

@@ -30,7 +30,7 @@ export interface LevelReward {
 
 export interface LevelDefinition {
   id: string;
-  worldNumber: 1 | 2;
+  worldNumber: 1 | 2 | 3;
   levelNumber: number;
   worldTitle: string;
   title: string;

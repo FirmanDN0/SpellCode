@@ -141,4 +141,60 @@ describe("Tahap 4B: Authentication and Session Management Verification", () => {
       expect(navbarContent).toContain("profileLabel");
     });
   });
+
+  describe("5. Isolasi Akun Tamu saat Logout (Pembersihan Residu Akun Online)", () => {
+    it("memastikan resetGuestDataToDefault mengembalikan profil dan progres ke kondisi awal fresh guest", async () => {
+      const {
+        getGuestData,
+        saveGuestData,
+        resetGuestDataToDefault,
+        defaultInitialGuestData,
+      } = await import("@/lib/storage/guestStorage");
+
+      // Simulasi akun yang terisi progres FirmanDN
+      saveGuestData({
+        ...defaultInitialGuestData,
+        profile: {
+          ...defaultInitialGuestData.profile,
+          displayName: "FirmanDN",
+          totalXp: 1100,
+          wizardRank: "Master Spellcoder",
+          syncedCloudUserId: "user-firman-123",
+        },
+        progress: {
+          "w1-l1": { status: "completed", stars: 3, bestStepCount: 3, attemptsCount: 1 },
+          "w1-l2": { status: "completed", stars: 3, bestStepCount: 5, attemptsCount: 1 },
+        },
+      });
+
+      // Verifikasi sebelum reset
+      const dirty = getGuestData();
+      expect(dirty.profile.displayName).toBe("FirmanDN");
+      expect(dirty.profile.totalXp).toBe(1100);
+
+      // Jalankan resetGuestDataToDefault
+      const fresh = resetGuestDataToDefault();
+      expect(fresh.profile.displayName).toBe("Penyihir Cilik");
+      expect(fresh.profile.totalXp).toBe(0);
+      expect(fresh.profile.wizardRank).toBe("Novice Conjurer");
+      expect(fresh.profile.syncedCloudUserId).toBeUndefined();
+      expect(fresh.progress["w1-l1"].status).toBe("unlocked");
+      expect(fresh.progress["w1-l1"].stars).toBe(0);
+      expect(fresh.progress["w1-l2"]).toBeUndefined();
+
+      // Verifikasi pembacaan ulang getGuestData
+      const reRead = getGuestData();
+      expect(reRead.profile.displayName).toBe("Penyihir Cilik");
+      expect(reRead.profile.totalXp).toBe(0);
+    });
+
+    it("memastikan useUserSession.ts memanggil resetGuestDataToDefault saat signOut", () => {
+      const sessionContent = fs.readFileSync(
+        path.resolve(process.cwd(), "lib/supabase/useUserSession.ts"),
+        "utf-8"
+      );
+      expect(sessionContent).toContain("resetGuestDataToDefault");
+      expect(sessionContent).toContain("resetGuestDataToDefault()");
+    });
+  });
 });

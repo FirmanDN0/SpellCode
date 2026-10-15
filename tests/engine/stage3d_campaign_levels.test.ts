@@ -10,12 +10,13 @@ import {
 import { SpellProgram } from "@/lib/engine/types";
 
 describe("Tahap 3D: Level Campaign & Gameplay Integration", () => {
-  it("verifies that all 12 MVP levels exist and have stable IDs, objectives, and rewards", () => {
-    expect(allLevels.length).toBe(12);
+  it("verifies that all 18 campaign levels exist and have stable IDs, objectives, and rewards", () => {
+    expect(allLevels.length).toBe(18);
 
     const expectedIds = [
       "w1-l1", "w1-l2", "w1-l3", "w1-l4", "w1-l5", "w1-l6",
       "w2-l1", "w2-l2", "w2-l3", "w2-l4", "w2-l5", "w2-l6",
+      "w3-l1", "w3-l2", "w3-l3", "w3-l4", "w3-l5", "w3-l6",
     ];
 
     for (const id of expectedIds) {
@@ -532,6 +533,164 @@ describe("Tahap 3D: Level Campaign & Gameplay Integration", () => {
 
         expect(result.status).toBe("FAILED");
         expect(result.evaluation.isVictory).toBe(false);
+      });
+    });
+  });
+
+  describe("World 3: Cloud Citadel (Conditionals & Advanced Logic)", () => {
+    // Level 1: w3-l1 (Sensor Jurang Awan)
+    describe("Level 1 (w3-l1): Sensor Jurang Awan", () => {
+      const level = getLevelById("w3-l1")!;
+
+      it("succeeds with forward sequence to portal", () => {
+        const solution: SpellProgram = {
+          version: 1,
+          nodes: [
+            createActionNode("STEP_FORWARD"),
+            createActionNode("STEP_FORWARD"),
+            createActionNode("STEP_FORWARD"),
+            createActionNode("STEP_FORWARD"),
+          ],
+        };
+        const state = createInitialGridState(level.grid);
+        const result = runSpellProgram(solution, state, level.parSteps, {
+          objectives: level.objectives,
+        });
+
+        expect(result.status).toBe("VICTORY");
+        expect(result.evaluation.atPortal).toBe(true);
+      });
+    });
+
+    // Level 2: w3-l2 (Detektor Kristal Langit)
+    describe("Level 2 (w3-l2): Detektor Kristal Langit", () => {
+      const level = getLevelById("w3-l2")!;
+
+      it("succeeds by collecting shard and reaching portal", () => {
+        const solution: SpellProgram = {
+          version: 1,
+          nodes: [
+            createActionNode("STEP_FORWARD"),
+            createActionNode("STEP_FORWARD"),
+            createIfNode("IS_SHARD_PRESENT", [createActionNode("COLLECT_SHARD")]),
+            createActionNode("STEP_FORWARD"),
+            createActionNode("STEP_FORWARD"),
+          ],
+        };
+        const state = createInitialGridState(level.grid);
+        const result = runSpellProgram(solution, state, level.parSteps, {
+          objectives: level.objectives,
+        });
+
+        expect(result.status).toBe("VICTORY");
+        expect(result.evaluation.allShardsCollected).toBe(true);
+        expect(result.evaluation.atPortal).toBe(true);
+      });
+    });
+
+    // Level 3: w3-l3 (Lentera Penjaga Awan)
+    describe("Level 3 (w3-l3): Lentera Penjaga Awan", () => {
+      const level = getLevelById("w3-l3")!;
+
+      it("succeeds by lighting torch and reaching portal", () => {
+        const solution: SpellProgram = {
+          version: 1,
+          nodes: [
+            createActionNode("STEP_FORWARD"),
+            createActionNode("STEP_FORWARD"),
+            createIfNode("IS_TORCH_PRESENT", [createActionNode("LIGHT_TORCH")]),
+            createActionNode("STEP_FORWARD"),
+            createActionNode("STEP_FORWARD"),
+          ],
+        };
+        const state = createInitialGridState(level.grid);
+        const result = runSpellProgram(solution, state, level.parSteps, {
+          objectives: level.objectives,
+        });
+
+        expect(result.status).toBe("VICTORY");
+        expect(result.evaluation.allTorchesLit).toBe(true);
+        expect(result.evaluation.atPortal).toBe(true);
+      });
+    });
+
+    // Level 4: w3-l4 (Patroli Awan Otomatis)
+    describe("Level 4 (w3-l4): Patroli Awan Otomatis", () => {
+      const level = getLevelById("w3-l4")!;
+
+      it("succeeds with loop containing conditional torch and shard collection", () => {
+        const solution: SpellProgram = {
+          version: 1,
+          nodes: [
+            createRepeatNode(5, [
+              createActionNode("STEP_FORWARD"),
+              createIfNode("IS_TORCH_PRESENT", [createActionNode("LIGHT_TORCH")]),
+              createIfNode("IS_SHARD_PRESENT", [createActionNode("COLLECT_SHARD")]),
+            ]),
+          ],
+        };
+        const state = createInitialGridState(level.grid);
+        const result = runSpellProgram(solution, state, level.parSteps, {
+          objectives: level.objectives,
+        });
+
+        expect(result.status).toBe("VICTORY");
+        expect(result.evaluation.allTorchesLit).toBe(true);
+        expect(result.evaluation.allShardsCollected).toBe(true);
+        expect(result.evaluation.atPortal).toBe(true);
+      });
+    });
+
+    // Level 5: w3-l5 (Simpang Labirin Langit)
+    describe("Level 5 (w3-l5): Simpang Labirin Langit", () => {
+      const level = getLevelById("w3-l5")!;
+
+      it("succeeds by turning right at obstacle and navigating to portal", () => {
+        const solution: SpellProgram = {
+          version: 1,
+          nodes: [
+            createActionNode("STEP_FORWARD"),
+            createIfNode("IS_OBSTACLE_AHEAD", [createActionNode("TURN_RIGHT")]),
+            createActionNode("STEP_FORWARD"),
+            createActionNode("STEP_FORWARD"),
+            createActionNode("TURN_LEFT"),
+            createActionNode("STEP_FORWARD"),
+          ],
+        };
+        const state = createInitialGridState(level.grid);
+        const result = runSpellProgram(solution, state, level.parSteps, {
+          objectives: level.objectives,
+        });
+
+        expect(result.status).toBe("VICTORY");
+        expect(result.evaluation.atPortal).toBe(true);
+      });
+    });
+
+    // Level 6: w3-l6 (Puncak Istana Awan Abadi)
+    describe("Level 6 (w3-l6): Puncak Istana Awan Abadi", () => {
+      const level = getLevelById("w3-l6")!;
+
+      it("succeeds with loop and conditional actions collecting shards and torch", () => {
+        const solution: SpellProgram = {
+          version: 1,
+          nodes: [
+            createRepeatNode(5, [
+              createActionNode("STEP_FORWARD"),
+              createIfNode("IS_SHARD_PRESENT", [createActionNode("COLLECT_SHARD")]),
+              createIfNode("IS_TORCH_PRESENT", [createActionNode("LIGHT_TORCH")]),
+            ]),
+          ],
+        };
+        const state = createInitialGridState(level.grid);
+        const result = runSpellProgram(solution, state, level.parSteps, {
+          objectives: level.objectives,
+        });
+
+        expect(result.status).toBe("VICTORY");
+        expect(result.evaluation.allTorchesLit).toBe(true);
+        expect(result.evaluation.allShardsCollected).toBe(true);
+        expect(result.evaluation.atPortal).toBe(true);
       });
     });
   });

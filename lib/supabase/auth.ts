@@ -1,7 +1,3 @@
-import { redirect } from "next/navigation";
-import { createClient as createServerSupabaseClient } from "./server";
-import { User } from "@supabase/supabase-js";
-
 export interface ValidationResult {
   isValid: boolean;
   error?: string;
@@ -111,33 +107,3 @@ export function getFriendlyAuthErrorMessage(error: unknown): string {
   return "Gerbang sihir sedang sibuk. Mohon coba beberapa saat lagi.";
 }
 
-/**
- * Server-side helper untuk memeriksa session pengguna di Server Components atau Route Handlers.
- */
-export async function getServerSession(): Promise<{ user: User | null }> {
-  try {
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
-
-    if (error || !user) {
-      return { user: null };
-    }
-    return { user };
-  } catch {
-    return { user: null };
-  }
-}
-
-/**
- * Server-side guard yang mengarahkan pengguna ke halaman login jika belum terotentikasi.
- */
-export async function requireAuth(nextUrl: string = "/profile"): Promise<User> {
-  const { user } = await getServerSession();
-  if (!user) {
-    redirect(`/login?next=${encodeURIComponent(nextUrl)}&message=auth_required`);
-  }
-  return user;
-}
