@@ -34,9 +34,19 @@ export function useUserSession(): UserSessionState {
       setProfile(prof);
       setProgress(prog);
 
-      // Sinkronisasi data lokal jika ada progres online yang lebih mutakhir
+      // Sinkronisasi data lokal jika ada profil/progres online yang lebih mutakhir
       if (prof) {
         const local = getGuestData();
+        const mergedProgress = { ...local.progress };
+        for (const [lvlId, record] of Object.entries(prog)) {
+          mergedProgress[lvlId] = {
+            status: record.status as "unlocked" | "completed",
+            stars: Math.max(record.stars || 0, mergedProgress[lvlId]?.stars || 0),
+            bestStepCount: record.best_step_count ?? mergedProgress[lvlId]?.bestStepCount ?? 0,
+            attemptsCount: record.attempts_count ?? mergedProgress[lvlId]?.attemptsCount ?? 1,
+            firstCompletedAt: record.first_completed_at ?? undefined,
+          };
+        }
         saveGuestData({
           ...local,
           profile: {
@@ -49,6 +59,7 @@ export function useUserSession(): UserSessionState {
             syncedCloudUserId: currentUser.id,
             syncedCloudEmail: currentUser.email || undefined,
           },
+          progress: mergedProgress,
         });
       }
     } catch (err) {

@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const pathname = usePathname();
-  const { profile, isOnline } = useUserSession();
+  const { profile, isOnline, progress: onlineProgress } = useUserSession();
   const [guestData, setGuestData] = useState<GuestData | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -29,9 +29,25 @@ export function Navbar() {
     };
   }, [pathname]);
 
-  const totalStars = guestData
-    ? Object.values(guestData.progress).reduce((acc, p) => acc + (p.stars || 0), 0)
-    : 0;
+  const effectiveProgress = React.useMemo(() => {
+    const merged = { ...(guestData?.progress || {}) };
+    if (isOnline && onlineProgress) {
+      for (const [lvlId, record] of Object.entries(onlineProgress)) {
+        merged[lvlId] = {
+          status: record.status as "unlocked" | "completed",
+          stars: Math.max(record.stars || 0, merged[lvlId]?.stars || 0),
+          bestStepCount: record.best_step_count ?? merged[lvlId]?.bestStepCount ?? 0,
+          attemptsCount: record.attempts_count ?? merged[lvlId]?.attemptsCount ?? 1,
+        };
+      }
+    }
+    return merged;
+  }, [guestData, isOnline, onlineProgress]);
+
+  const totalStars = Object.values(effectiveProgress).reduce(
+    (acc, p) => acc + (p.stars || 0),
+    0
+  );
 
   const totalXp = profile?.total_xp ?? guestData?.profile.totalXp ?? 0;
 

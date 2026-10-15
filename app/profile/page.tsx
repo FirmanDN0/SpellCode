@@ -27,7 +27,7 @@ import { useUserSession } from "@/lib/supabase/useUserSession";
 import { updateProfileAppearance } from "@/lib/supabase/repository";
 
 export default function ProfilePage() {
-  const { user, profile, isOnline, signOut, isLoading } = useUserSession();
+  const { user, profile, isOnline, signOut, isLoading, progress: onlineProgress } = useUserSession();
   const [guestData, setGuestData] = useState<GuestData | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [inputName, setInputName] = useState("");
@@ -82,17 +82,29 @@ export default function ProfilePage() {
     profile?.wizard_rank || guestData?.profile.wizardRank || "Novice Conjurer";
   const xp = profile?.total_xp ?? guestData?.profile.totalXp ?? 0;
 
-  const totalStars = guestData
-    ? Object.values(guestData.progress).reduce(
-        (sum, p) => sum + (p.stars || 0),
-        0
-      )
-    : 0;
+  const effectiveProgress = React.useMemo(() => {
+    const merged = { ...(guestData?.progress || {}) };
+    if (isOnline && onlineProgress) {
+      for (const [lvlId, record] of Object.entries(onlineProgress)) {
+        merged[lvlId] = {
+          status: record.status as "unlocked" | "completed",
+          stars: Math.max(record.stars || 0, merged[lvlId]?.stars || 0),
+          bestStepCount: record.best_step_count ?? merged[lvlId]?.bestStepCount ?? 0,
+          attemptsCount: record.attempts_count ?? merged[lvlId]?.attemptsCount ?? 1,
+        };
+      }
+    }
+    return merged;
+  }, [guestData, isOnline, onlineProgress]);
 
-  const completedLevelsCount = guestData
-    ? Object.values(guestData.progress).filter((p) => p.status === "completed")
-        .length
-    : 0;
+  const totalStars = Object.values(effectiveProgress).reduce(
+    (sum, p) => sum + (p.stars || 0),
+    0
+  );
+
+  const completedLevelsCount = Object.values(effectiveProgress).filter(
+    (p) => p.status === "completed"
+  ).length;
 
   const nextRankTarget =
     xp < 200 ? 200 : xp < 500 ? 500 : xp < 1000 ? 1000 : 2000;
