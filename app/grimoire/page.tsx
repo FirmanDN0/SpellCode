@@ -48,7 +48,7 @@ export default function GrimoirePage() {
       debugTip:
         "Jika kamu merapalkan 'Nyalakan Lentera' sebelum tiba di petak lentera, mantramu akan misfire karena lentera belum terjangkau.",
       practiceLevelId: "w1-l1",
-      practiceLevelTitle: "Level 1: Lentera Pertama",
+      practiceLevelTitle: "World 1 Level 1: Langkah Pertama Magang",
     },
     {
       id: "loops",
@@ -71,7 +71,7 @@ export default function GrimoirePage() {
       debugTip:
         "Perhatikan angka perulangan! Jika kamu mengulang 5 kali pada jalan yang hanya butuh 4 kali, penyihir akan menabrak rintangan di ujung jalan.",
       practiceLevelId: "w2-l1",
-      practiceLevelTitle: "Level 9: Pengulangan Pertama",
+      practiceLevelTitle: "World 2 Level 1: Langkah Berulang di Gua Kristal",
     },
     {
       id: "conditionals",
@@ -94,7 +94,7 @@ export default function GrimoirePage() {
       debugTip:
         "Pastikan kondisi yang kamu tanyakan jelas. Komputer hanya mengenal jawaban pasti: Benar (True) atau Salah (False).",
       practiceLevelId: "w3-l1",
-      practiceLevelTitle: "Level 1: Sensor Jurang Awan",
+      practiceLevelTitle: "World 3 Level 1: Sensor Jurang Awan",
     },
     {
       id: "debugging",
@@ -117,7 +117,7 @@ export default function GrimoirePage() {
       debugTip:
         "Gunakan tombol 'Langkah' di arena permainan untuk melihat animasi mantra satu per satu secara perlahan.",
       practiceLevelId: "w1-l2",
-      practiceLevelTitle: "Level 2: Belokan Peri",
+      practiceLevelTitle: "World 1 Level 2: Belokan di Tikungan Peri",
     },
   ];
 

@@ -638,6 +638,7 @@ describe("Tahap 3D: Level Campaign & Gameplay Integration", () => {
         expect(result.evaluation.allTorchesLit).toBe(true);
         expect(result.evaluation.allShardsCollected).toBe(true);
         expect(result.evaluation.atPortal).toBe(true);
+        expect(result.evaluation.stars).toBe(3);
       });
     });
 
@@ -664,6 +665,7 @@ describe("Tahap 3D: Level Campaign & Gameplay Integration", () => {
 
         expect(result.status).toBe("VICTORY");
         expect(result.evaluation.atPortal).toBe(true);
+        expect(result.evaluation.stars).toBe(3);
       });
     });
 
@@ -691,6 +693,7 @@ describe("Tahap 3D: Level Campaign & Gameplay Integration", () => {
         expect(result.evaluation.allTorchesLit).toBe(true);
         expect(result.evaluation.allShardsCollected).toBe(true);
         expect(result.evaluation.atPortal).toBe(true);
+        expect(result.evaluation.stars).toBe(3);
       });
     });
   });

@@ -194,7 +194,10 @@ async function runE2EUserJourney() {
     // 6. Pemain dapat menyusun program
     // -------------------------------------------------------------------------
     await page.goto(`${baseUrl}/play/w1-l1`, { waitUntil: "domcontentloaded" });
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
+
+    const addStepBtn = page.locator("button:has-text('Maju 1 Langkah')").first();
+    await addStepBtn.waitFor({ state: "visible", timeout: 10000 });
 
     // Bersihkan deck jika ada balok tersisa dan tombol aktif
     const clearBtn = page.locator("button[aria-label='Kosongkan Meja Mantra']").first();
@@ -208,9 +211,8 @@ async function runE2EUserJourney() {
       }
     }
 
-    const addStepBtn = page.locator("button:has-text('Maju 1 Langkah')").first();
     await addStepBtn.click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(400);
 
     const blockCountText = (await page.locator("span:has-text('Blok')").first().textContent()) || "";
     const blockAdded = blockCountText.includes("1 Blok");
@@ -225,10 +227,11 @@ async function runE2EUserJourney() {
     // 7. Run dan Step menjalankan engine
     // -------------------------------------------------------------------------
     const stepBtn = page.locator("button[aria-label='Eksekusi Satu Langkah']");
+    await stepBtn.waitFor({ state: "visible", timeout: 5000 });
     let stepExecutedWithoutError = false;
     if (await stepBtn.isEnabled()) {
       await stepBtn.click();
-      await page.waitForTimeout(300);
+      await page.waitForTimeout(400);
       stepExecutedWithoutError = true;
     }
 
@@ -243,10 +246,11 @@ async function runE2EUserJourney() {
     // 8. Reset mengembalikan arena ke state awal
     // -------------------------------------------------------------------------
     const resetBtn = page.locator("button[aria-label='Reset Posisi Arena']");
+    await resetBtn.waitFor({ state: "visible", timeout: 5000 });
     let resetExecutedWithoutError = false;
     try {
       await resetBtn.click();
-      await page.waitForTimeout(300);
+      await page.waitForTimeout(400);
       resetExecutedWithoutError = true;
     } catch {
       resetExecutedWithoutError = false;
@@ -269,8 +273,9 @@ async function runE2EUserJourney() {
     await page.waitForTimeout(200);
 
     const runBtn = page.locator("button:has-text('Rapalkan Mantra')");
+    await runBtn.waitFor({ state: "visible", timeout: 5000 });
     await runBtn.click();
-    await page.waitForSelector("text=Mantra Selesai!", { timeout: 8000 });
+    await page.waitForSelector("text=Mantra Selesai!", { timeout: 10000 });
 
     const victoryHeader = page.locator("text=Mantra Selesai!");
     const isVictory = await victoryHeader.isVisible();

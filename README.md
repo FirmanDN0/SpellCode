@@ -8,7 +8,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database%20%26%20Auth-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
-[![Vitest](https://img.shields.io/badge/Tests-164%20Passed-brightgreen?style=for-the-badge&logo=vitest)](https://vitest.dev/)
+[![Vitest](https://img.shields.io/badge/Tests-173%20Passed-brightgreen?style=for-the-badge&logo=vitest)](https://vitest.dev/)
+[![E2E](https://img.shields.io/badge/Playwright%20E2E-13%2F13%20Passed-blue?style=for-the-badge&logo=playwright)](tests/e2e-user-journey.mjs)
 
 ---
 
@@ -134,14 +135,18 @@ node tests/audit-modals.mjs
 
 ---
 
-## 🚢 Panduan Deployment
+## 📚 Dokumentasi Proyek Lengkap
 
-SpellCode siap dideploy secara instan ke **Vercel** dan **Supabase**.  
-Petunjuk langkah demi langkah lengkap untuk konfigurasi environment variables, migrasi database, dan checklist keamanan produksi tersedia di:
-- [Panduan Deployment Komprehensif](docs/DEPLOYMENT_GUIDE.md)
-- [Laporan Audit Pengujian (QA Test Report)](docs/TEST_REPORT.md)
-- [Review Keamanan & RLS Audit](docs/SECURITY_REVIEW.md)
-- [Spesifikasi Teknis Engine Mantra](docs/SPELL_ENGINE_ARCHITECTURE.md)
+Seluruh dokumen perancangan dan audit SpellCode tersedia di folder `docs/`:
+- **[Product Requirements Document (PRD)](docs/PRD.md)**: Dokumen kebutuhan produk utama.
+- **[Spesifikasi Produk & Desain Game](docs/PRODUCT_SPEC.md)**: Game design document, personas, dan pilar mekanik.
+- **[Kriteria Penerimaan & Evaluasi](docs/ACCEPTANCE_CRITERIA.md)**: Checklist kriteria lolos pengujian.
+- **[Arsitektur Teknis Sistem](docs/TECHNICAL_ARCHITECTURE.md)**: Arsitektur data flow, domain model, dan server.
+- **[Panduan Deployment Komprehensif](docs/DEPLOYMENT_GUIDE.md)**: Konfigurasi Supabase dan Vercel.
+- **[Laporan Audit Kualitas 5B](docs/QUALITY_AUDIT_5B.md)**: Laporan bug hunt, responsivitas, dan aksesibilitas.
+- **[Laporan Audit Pengujian (QA Test Report)](docs/TEST_REPORT.md)**: Hasil pengujian otomatis Vitest & Playwright.
+- **[Review Keamanan & RLS Audit](docs/SECURITY_REVIEW.md)**: Analisis keamanan basis data.
+- **[Spesifikasi Teknis Engine Mantra](docs/SPELL_ENGINE_ARCHITECTURE.md)**: Mesin virtual AST deterministik.
 
 ---
 

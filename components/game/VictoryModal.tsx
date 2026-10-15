@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Star,
@@ -53,17 +53,68 @@ export function VictoryModal({
   onRetry,
   onClose,
 }: VictoryModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
-    if (isOpen) {
-      soundManager.playVictory();
-      // Mainkan chime bintang berurutan
-      for (let i = 1; i <= stars; i++) {
-        setTimeout(() => {
-          soundManager.playStar(i);
-        }, 300 + i * 250);
-      }
+    if (!isOpen) return;
+
+    previouslyFocusedElementRef.current = document.activeElement as HTMLElement;
+
+    soundManager.playVictory();
+    // Mainkan chime bintang berurutan
+    for (let i = 1; i <= stars; i++) {
+      setTimeout(() => {
+        soundManager.playStar(i);
+      }, 300 + i * 250);
     }
-  }, [isOpen, stars]);
+
+    // Auto-fokus ke tombol aksi utama
+    const focusTimer = setTimeout(() => {
+      const primaryBtn = modalRef.current?.querySelector<HTMLElement>(
+        'a[href], button'
+      );
+      primaryBtn?.focus();
+    }, 100);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      // Focus Trap WCAG AA
+      if (e.key === "Tab") {
+        if (!modalRef.current) return;
+        const focusables = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusables.length === 0) return;
+
+        const firstElement = focusables[0];
+        const lastElement = focusables[focusables.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      clearTimeout(focusTimer);
+      window.removeEventListener("keydown", handleKeyDown);
+      previouslyFocusedElementRef.current?.focus();
+    };
+  }, [isOpen, stars, onClose]);
 
   if (!isOpen) return null;
 
@@ -74,7 +125,10 @@ export function VictoryModal({
       aria-modal="true"
       aria-labelledby="victory-title"
     >
-      <div className="relative w-full max-w-md p-6 sm:p-8 rounded-dialog bg-gradient-to-b from-spell-purple-900 to-spell-purple-950 border-2 border-spell-gold-400/80 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_40px_rgba(245,158,11,0.25)] flex flex-col items-center text-center">
+      <div
+        ref={modalRef}
+        className="relative w-full max-w-md p-6 sm:p-8 rounded-dialog bg-gradient-to-b from-spell-purple-900 to-spell-purple-950 border-2 border-spell-gold-400/80 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_40px_rgba(245,158,11,0.25)] flex flex-col items-center text-center"
+      >
         {/* Hiasan Puncak */}
         <div className="absolute -top-6 px-6 py-1.5 rounded-full bg-gradient-to-r from-spell-gold-600 via-spell-gold-400 to-spell-gold-600 border-2 border-white text-spell-purple-950 font-black text-sm tracking-wider uppercase shadow-lg">
           ✨ Mantra Selesai! ✨

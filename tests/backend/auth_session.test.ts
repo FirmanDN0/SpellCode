@@ -7,6 +7,12 @@ import {
   validateUsername,
   getFriendlyAuthErrorMessage,
 } from "@/lib/supabase/auth";
+import {
+  getGuestData,
+  saveGuestData,
+  resetGuestDataToDefault,
+  defaultInitialGuestData,
+} from "@/lib/storage/guestStorage";
 
 describe("Tahap 4B: Authentication and Session Management Verification", () => {
   describe("1. Validasi Input Form Autentikasi Ramah Anak", () => {
@@ -143,14 +149,7 @@ describe("Tahap 4B: Authentication and Session Management Verification", () => {
   });
 
   describe("5. Isolasi Akun Tamu saat Logout (Pembersihan Residu Akun Online)", () => {
-    it("memastikan resetGuestDataToDefault mengembalikan profil dan progres ke kondisi awal fresh guest", async () => {
-      const {
-        getGuestData,
-        saveGuestData,
-        resetGuestDataToDefault,
-        defaultInitialGuestData,
-      } = await import("@/lib/storage/guestStorage");
-
+    it("memastikan resetGuestDataToDefault mengembalikan profil dan progres ke kondisi awal fresh guest", () => {
       // Simulasi akun yang terisi progres FirmanDN
       saveGuestData({
         ...defaultInitialGuestData,

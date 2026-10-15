@@ -156,8 +156,8 @@ export const world3Levels: LevelDefinition[] = [
     allowedRunes: ["STEP_FORWARD", "LIGHT_TORCH", "COLLECT_SHARD"],
     allowRepeatRune: true,
     allowConditionRune: true,
-    parSteps: 5,
-    maxInstructions: 6,
+    parSteps: 7,
+    maxInstructions: 8,
     baseXp: 150,
     rewards: {
       xp: 150,
@@ -257,8 +257,8 @@ export const world3Levels: LevelDefinition[] = [
     allowedRunes: ["STEP_FORWARD", "TURN_LEFT", "TURN_RIGHT", "LIGHT_TORCH", "COLLECT_SHARD"],
     allowRepeatRune: true,
     allowConditionRune: true,
-    parSteps: 6,
-    maxInstructions: 8,
+    parSteps: 8,
+    maxInstructions: 10,
     baseXp: 200,
     rewards: {
       xp: 200,

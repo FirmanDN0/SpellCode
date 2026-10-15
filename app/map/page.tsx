@@ -222,9 +222,9 @@ export default function WorldMapPage() {
             </div>
             <p className="text-xs sm:text-sm text-spell-purple-300 mt-1">
               {selectedWorld === 1
-                ? "Fokus: Menyusun urutan langkah runtun tanpa melewatkan petak instruksi (8 Level)."
+                ? "Fokus: Menyusun urutan langkah runtun tanpa melewatkan petak instruksi (6 Level)."
                 : selectedWorld === 2
-                ? "Fokus: Mengidentifikasi pola berulang dan membungkusnya dalam satu loop efisien (7 Level)."
+                ? "Fokus: Mengidentifikasi pola berulang dan membungkusnya dalam satu loop efisien (6 Level)."
                 : "Fokus: Mengambil keputusan cerdas dengan sensor kondisi IF dan aksi adaptif (6 Level)."}
             </p>
           </div>

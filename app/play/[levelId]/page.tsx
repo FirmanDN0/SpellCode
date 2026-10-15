@@ -78,6 +78,7 @@ function LevelNotFoundView() {
 
 function PlayLevelContent({ level }: { level: LevelDefinition }) {
   const {
+    controller,
     snapshot,
     step: controllerStep,
     run: controllerRun,
@@ -97,6 +98,7 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
     finalSteps: number;
   } | null>(null);
   const [mobileView, setMobileView] = useState<"all" | "arena" | "editor">("all");
+  const isExecutingRef = useRef<boolean>(false);
 
   // Inisialisasi atau pulihkan draf susunan blok terakhir
   useEffect(() => {
@@ -367,47 +369,61 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
   };
 
   const handleStep = () => {
-    if (isRunning) return;
-    const hasNext = controllerStep();
-    const currentEvents = snapshot.events;
-    const latestEvent = currentEvents[currentEvents.length - 1];
+    if (isExecutingRef.current || isRunning) return;
+    isExecutingRef.current = true;
+    try {
+      const hasNext = controllerStep();
+      const freshSnapshot = controller?.getSnapshot() || snapshot;
+      const currentEvents = freshSnapshot.events;
+      const latestEvent = currentEvents[currentEvents.length - 1];
 
-    if (hasNext) {
-      playSoundForCommand(latestEvent?.command);
-    } else {
-      if (snapshot.status === "FAILED") {
-        soundManager.playMisfire();
-      } else if (snapshot.evaluation?.isVictory) {
-        handleVictory(snapshot.evaluation, snapshot.stepsTaken);
+      if (hasNext) {
+        playSoundForCommand(latestEvent?.command);
+      } else {
+        if (freshSnapshot.status === "FAILED") {
+          soundManager.playMisfire();
+        } else if (freshSnapshot.evaluation?.isVictory) {
+          handleVictory(freshSnapshot.evaluation, freshSnapshot.stepsTaken);
+        }
       }
+    } finally {
+      isExecutingRef.current = false;
     }
   };
 
   const handlePlay = async () => {
-    if (isRunning || program.nodes.length === 0) return;
+    if (isExecutingRef.current || isRunning || program.nodes.length === 0) return;
+    isExecutingRef.current = true;
 
-    controllerReset();
-    const delay = speed === 1 ? 400 : 220;
+    try {
+      controllerReset();
+      const delay = speed === 1 ? 400 : 220;
 
-    const result = await controllerRun({
-      speedMs: delay,
-      onStep: (event) => {
-        if (event.type === "STEP_COMPLETE") {
-          playSoundForCommand(event.command);
+      const result = await controllerRun({
+        speedMs: delay,
+        onStep: (event) => {
+          if (event.type === "STEP_COMPLETE") {
+            playSoundForCommand(event.command);
+          }
+        },
+      });
+
+      if (result) {
+        if (result.status === "VICTORY") {
+          await handleVictory(result.evaluation, result.totalSteps);
+        } else {
+          soundManager.playMisfire();
         }
-      },
-    });
-
-    if (result) {
-      if (result.status === "VICTORY") {
-        handleVictory(result.evaluation, result.totalSteps);
-      } else {
-        soundManager.playMisfire();
       }
+    } catch (err) {
+      console.warn("Eksekusi mantra dicegah atau diinterupsi:", err);
+    } finally {
+      isExecutingRef.current = false;
     }
   };
 
   const handleReset = () => {
+    isExecutingRef.current = false;
     setIsVictoryModalOpen(false);
     setEvalResult(null);
     controllerReset();
