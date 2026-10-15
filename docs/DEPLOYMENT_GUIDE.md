@@ -56,9 +56,10 @@ supabase migration up
 ```
 Daftar file migrasi di folder `supabase/migrations/`:
 1. `20261014000001_initial_schema.sql`: Inisialisasi struktur tabel.
-2. `20261014000002_rls_policies.sql`: Penguatan kebijakan Row Level Security.
+2. `20261014000002_row_level_security.sql`: Penguatan kebijakan Row Level Security.
 3. `20261014000003_auth_triggers.sql`: Function dan trigger pembuatan profil otomatis.
 4. `20261014000004_seed_campaign.sql`: Seed data katalog World 1 & World 2.
+5. `20261015000005_seed_world3.sql`: Seed data katalog World 3 (Cloud Citadel / Benteng Awan).
 
 ### Langkah 3: Konfigurasi Supabase Auth Redirect
 Buka **Supabase Dashboard > Authentication > URL Configuration**:
@@ -127,16 +128,33 @@ Aplikasi dapat dibuka di browser pada alamat: `http://localhost:3000`.
 
 ---
 
-## 6. Checklist Verifikasi Pasca-Deployment
+## 6. Smoke Test & Checklist Verifikasi Pasca-Deployment
 
-Lakukan verifikasi berikut setelah URL produksi aktif:
-- [ ] Buka halaman utama (`/`) dan pastikan seluruh visual SVG dan gradien ter-render tanpa layout shift.
-- [ ] Buka `/map` dalam mode tamu: level World 1 dapat dimainkan.
-- [ ] Masuk ke `/login` dan uji pendaftaran atau login akun.
-- [ ] Selesaikan Level 1 (`w1-l1`), pastikan modal kemenangan muncul dan progres tersimpan.
-- [ ] Periksa bilah navigasi atas: nama akun aktif ditampilkan dengan indikator hijau online.
-- [ ] Refresh halaman browser: progres level, bintang, dan Mana XP tetap utuh dan tersinkronisasi.
-- [ ] Cek tab Network di DevTools browser: tidak ada request aset yang menghasilkan status 404 atau 500.
+### Status Verifikasi Smoke Test
+* **Smoke Test Lokal (Node.js & Playwright E2E):** **LULUS (13/13 Skenario Lulus 100%)**
+* **Smoke Test Eksternal Cloud Live Deployment:** **PENDING (Menunggu penautan akun eksternal Vercel & Supabase oleh pengguna)**
+
+### Prosedur Smoke Test Pasca-Deployment Live
+Jalankan verifikasi berurutan berikut segera setelah URL produksi Vercel (`https://your-domain.vercel.app`) aktif:
+1. **Pemeriksaan Halaman Utama (`/`):**
+   - Pastikan visual hero, ilustrasi SVG, lencana, dan tombol CTA 'Mulai Petualangan' ter-render tanpa pergeseran tata letak (CLS).
+2. **Pemeriksaan Peta Dunia (`/map`):**
+   - Buka dalam mode tamu. Pastikan World 1 Level 1 berstatus aktif dan siap dimainkan.
+   - Klik kartu World 2 dan World 3 yang terkunci, pastikan modal prasyarat muncul dengan benar.
+3. **Pemeriksaan Gameplay & Evaluasi Engine (`/play/w1-l1`):**
+   - Tambahkan 3 balok 'Maju 1 Langkah'.
+   - Tekan 'Rapalkan Mantra', amati animasi langkah dan pastikan Modal Kemenangan (3 Bintang + XP) muncul.
+4. **Pemeriksaan Persistensi Data (Local-First):**
+   - Refresh browser pada level yang baru saja dimenangkan. Pastikan status level tetap tersimpan dan Level 2 otomatis terbuka.
+5. **Pemeriksaan Autentikasi Cloud (`/login`):**
+   - Coba lakukan pendaftaran akun baru menggunakan email dan password.
+   - Verifikasi bahwa profil pengguna berhasil dibuat di tabel `public.profiles` Supabase.
+6. **Pemeriksaan Error Handling Backend Offline:**
+   - Putuskan koneksi internet sementara, lalu jalankan satu level.
+   - Pastikan game tetap dapat diselesaikan 100% dan muncul indikator 'Mode Tamu / Offline' tanpa layar putih (crash).
+7. **Pemeriksaan Konsol & Jaringan Browser (DevTools):**
+   - Buka tab Console: pastikan 0 uncaught exception.
+   - Buka tab Network: pastikan tidak ada request aset biner (font, icon, script) yang menghasilkan status HTTP 404 atau 500.
 
 ---
 

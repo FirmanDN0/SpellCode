@@ -5,7 +5,10 @@ import { Footer } from "@/components/shared/Footer";
 import { ToastProvider } from "@/components/ui/Toast";
 
 export const metadata: Metadata = {
-  title: "SpellCode: Cast Spells with Code",
+  title: {
+    template: "%s | SpellCode",
+    default: "SpellCode: Cast Spells with Code",
+  },
   description:
     "Game edukasi pemrograman ramah anak untuk usia 7-12 tahun. Belajar computational thinking dengan meramu mantra sihir interaktif!",
   keywords: [
@@ -14,7 +17,30 @@ export const metadata: Metadata = {
     "game edukasi",
     "belajar pemrograman",
     "spellcode",
+    "akademi sihir",
+    "belajar logika",
   ],
+  authors: [{ name: "FirmanDN" }],
+  creator: "FirmanDN",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  openGraph: {
+    title: "SpellCode: Cast Spells with Code",
+    description:
+      "Game edukasi pemrograman ramah anak untuk usia 7-12 tahun. Belajar computational thinking dengan meramu mantra sihir interaktif!",
+    siteName: "SpellCode",
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SpellCode: Cast Spells with Code",
+    description:
+      "Game edukasi pemrograman ramah anak untuk usia 7-12 tahun. Belajar computational thinking dengan meramu mantra sihir interaktif!",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

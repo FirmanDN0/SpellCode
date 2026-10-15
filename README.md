@@ -143,6 +143,7 @@ Seluruh dokumen perancangan dan audit SpellCode tersedia di folder `docs/`:
 - **[Kriteria Penerimaan & Evaluasi](docs/ACCEPTANCE_CRITERIA.md)**: Checklist kriteria lolos pengujian.
 - **[Arsitektur Teknis Sistem](docs/TECHNICAL_ARCHITECTURE.md)**: Arsitektur data flow, domain model, dan server.
 - **[Panduan Deployment Komprehensif](docs/DEPLOYMENT_GUIDE.md)**: Konfigurasi Supabase dan Vercel.
+- **[Laporan Rilis Resmi 5C & Checklist Lomba](docs/RELEASE_REPORT_5C.md)**: Status acceptance criteria dan checklist demo lomba.
 - **[Laporan Audit Kualitas 5B](docs/QUALITY_AUDIT_5B.md)**: Laporan bug hunt, responsivitas, dan aksesibilitas.
 - **[Laporan Audit Pengujian (QA Test Report)](docs/TEST_REPORT.md)**: Hasil pengujian otomatis Vitest & Playwright.
 - **[Review Keamanan & RLS Audit](docs/SECURITY_REVIEW.md)**: Analisis keamanan basis data.
