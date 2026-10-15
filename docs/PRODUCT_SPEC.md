@@ -84,23 +84,22 @@ journey
    * Input nama magang (sudah terisi default ramah: `Penyihir Cilik`, dapat diubah).
    * Tombol: **"Buka Gerbang Akademi"** -> menyimpan profil ke `localStorage` dan berpindah ke `/map`.
 3. **Langkah 3 (Peta Akademi - `/map`)**:
-   * Menampilkan pulau terapung **World 1: Whispering Woods**.
-   * Node Level 1 ("Lentera Pertama") berpijar aktif dengan animasi denyut (*pulse*).
-   * Node Level 2 sampai 8 berstatus terkunci dengan ikon gembok kecil.
+   * Menampilkan pulau terapung **World 1: Whispering Woods**, **World 2: Crystal Caverns**, dan **World 3: Cloud Citadel**.
+   * Node Level 1 ("Langkah Pertama Magang") berpijar aktif dengan animasi denyut (*pulse*).
+   * Node Level 2 sampai 6 berstatus terkunci dengan ikon gembok kecil.
    * Header menampilkan avatar, nama magang, gelar `Novice Conjurer`, dan 0 Mana XP.
    * Anak menekan Node Level 1 -> navigasi ke `/play/w1-l1`.
 4. **Langkah 4 (Arena Permainan Level 1 - `/play/w1-l1`)**:
-   * **Grid Viewport**: Karakter penyihir di koordinat (0, 0) menghadap Timur. Lentera padam di koordinat (2, 0).
-   * **Rak Rune**: Tersedia blok `Maju 1 Langkah` dan `Nyalakan Lentera`.
+   * **Grid Viewport**: Karakter penyihir di koordinat (0, 1) menghadap Timur. Portal kemenangan di petak (3, 1).
+   * **Rak Rune**: Tersedia blok `Maju 1 Langkah`.
    * **Meja Mantra**: Kosong, dengan teks panduan: *"Klik atau tarik rune ke sini untuk meramu mantra!"*
-   * **Petunjuk Pyx**: *"Ayo nyalakan lentera suci! Tarik blok Maju 2 kali, lalu Nyalakan Lentera."*
+   * **Petunjuk Pyx**: *"Ayo langkahkan penyihir menuju portal! Susun blok Maju 3 kali."*
 5. **Langkah 5 (Eksekusi Mantra & Kemenangan)**:
-   * Anak memasukkan 2 blok `Maju` dan 1 blok `Nyalakan Lentera`.
+   * Anak memasukkan 3 blok `Maju`.
    * Anak menekan tombol hijau **"Rapalkan Mantra"**.
    * Karakter bergerak langkah demi langkah di grid; blok di meja mantra menyala kuning mengikuti gerakan.
-   * Obor menyala, portal bersinar hijau cerah.
-   * Suara terompet kemenangan dibunyikan.
-   * Modal Victory muncul: 3 Bintang, 100 XP, dan tombol **"Lanjut ke Level 2"**.
+   * Portal bersinar cerah dan terompet kemenangan dibunyikan.
+   * Modal Victory muncul: 3 Bintang, 50 XP, dan tombol **"Lanjut ke Level 2"**.
 
 ---
 
@@ -109,13 +108,13 @@ journey
 Untuk menjamin kualitas tinggi dan fokus demonstrasi lomba, antarmuka MVP difokuskan pada 6 halaman inti:
 
 ### 4.1 Halaman Utama (`/`)
-* Hero Section dengan ilustrasi ramah anak.
+* Hero Section dengan ilustrasi ramah anak dan kurikulum 18 Level di 3 Realm.
 * 3 Pilar Edukasi: *Berpikir Logis*, *Tanpa Frustrasi Sintaks*, *Mekanik Pemrograman Nyata*.
 * CTA langsung ke petualangan tanpa paksaan registrasi.
 
 ### 4.2 Peta Akademi (`/map`)
-* Visualisasi pulau terapung World 1 (Whispering Woods, 8 level) dan World 2 (Crystal Caverns, 7 level).
-* Indikator bintang per level (0-3 bintang) dan status gembok terbuka/terkunci.
+* Visualisasi pulau terapung World 1 (Whispering Woods, 6 level), World 2 (Crystal Caverns, 6 level), dan World 3 (Cloud Citadel, 6 level).
+* Indikator bintang per level (0-3 bintang) dan status gembok terbuka/terkunci dengan dialog ramah anak.
 * Akses cepat ke Grimoire dan Profil dari bilah navigasi atas.
 
 ### 4.3 Arena Permainan (`/play/[levelId]`)
@@ -155,9 +154,9 @@ Untuk menjamin kualitas tinggi dan fokus demonstrasi lomba, antarmuka MVP difoku
 
 | Konsep Ilmu Komputer | Istilah Sihir di Game | Implementasi di MVP | Sasaran Pedagogis |
 |---|---|---|---|
-| **Sequencing (Urutan Instruksi)** | Runtutan Mantra (*Spell Sequence*) | World 1 (Level 1-8): Maju, Putar Kiri, Putar Kanan, Ambil Kristal, Nyalakan Lentera | Mengajarkan bahwa urutan langkah menentukan keberhasilan program; salah satu langkah menyebabkan mantra gagal. |
-| **Loops & Repetition (Perulangan)** | Lingkaran Sihir (*Repeat Rune*) | World 2 (Level 9-15): Blok `repeat(N) { ... }` membungkus beberapa aksi | Mengenali pola berulang (*pattern recognition*) dan menghargai efisiensi kode (menyusun 4 blok berulang dibanding 16 blok manual). |
-| **Conditionals & Sensors (Kondisi Dasar)** | Perlindungan Elemen (*Elemental Wards*) | Deteksi otomatis rintangan di grid: Mantra berhenti jika membentur batu atau jurang | Menyadari interaksi antara perintah program dan batasan lingkungan sebelum masuk ke blok `if-else` kompleks. |
+| **Sequencing (Urutan Instruksi)** | Runtutan Mantra (*Spell Sequence*) | World 1 (Level 1-6): Maju, Putar Kiri, Putar Kanan, Nyalakan Lentera | Mengajarkan bahwa urutan langkah menentukan keberhasilan program; salah satu langkah menyebabkan mantra gagal. |
+| **Loops & Repetition (Perulangan)** | Lingkaran Sihir (*Repeat Rune*) | World 2 (Level 7-12): Blok `repeat(N) { ... }` membungkus beberapa aksi | Mengenali pola berulang (*pattern recognition*) dan menghargai efisiensi kode (menyusun 4 blok berulang dibanding 16 blok manual). |
+| **Conditionals & Sensors (Kondisi Logika)** | Perlindungan Elemen (*Elemental Wards*) | World 3 (Level 13-18): Blok `if (kondisi) { ... }` dan sensor jalan/jurang | Mengambil keputusan otomatis berdasarkan kondisi lingkungan sekitar sebelum melangkah. |
 | **Debugging Interaktif** | Penyelidikan Misfire (*Spell Inspection*) | Tombol "Satu Langkah" (Step) dan sorotan warna kuning pada blok yang sedang bergerak | Melatih dekomposisi masalah: menelusuri langkah demi langkah untuk menemukan di mana letak kesalahan belokan. |
 
 ---
@@ -188,7 +187,8 @@ Setiap level memiliki nilai standar langkah optimal (`par_steps`):
 ### 6.4 Aturan Pembukaan Level (*Unlock Rules*)
 * Level 1 selalu berstatus terbuka (*unlocked*).
 * Level berikutnya (`Level N+1`) terbuka otomatis saat `Level N` diselesaikan dengan minimal 1 Bintang.
-* World 2 (Crystal Caverns) terbuka setelah pemain menyelesaikan seluruh 8 level di World 1 dengan akumulasi minimal 16 Bintang.
+* World 2 (Crystal Caverns) terbuka setelah pemain mengumpulkan minimal 8 Bintang di World 1.
+* World 3 (Cloud Citadel) terbuka setelah pemain mengumpulkan minimal 16 Bintang dari gabungan World 1 dan World 2.
 
 ---
 
@@ -217,7 +217,7 @@ Setiap level memiliki nilai standar langkah optimal (`par_steps`):
 
 | Fitur | Mode Tamu (Tanpa Login) | Akun Cloud Terdaftar | Rationale |
 |---|---|---|---|
-| **Memainkan Seluruh 15 Level** | Ya (100% Akses Penuh) | Ya | Mencegah hambatan awal; anak bisa langsung belajar tanpa izin akun berbelit. |
+| **Memainkan Seluruh 18 Level** | Ya (100% Akses Penuh) | Ya | Mencegah hambatan awal; anak bisa langsung belajar tanpa izin akun berbelit. |
 | **Menyimpan Progres & Bintang** | Ya (Tersimpan di LocalStorage) | Ya (Tersinkron ke Database Supabase) | Progres lokal aman selama cache browser tidak dibersihkan. |
 | **Koleksi Familiar & XP** | Ya (Lokal) | Ya (Cloud) | Menjaga motivasi bermain anak tetap utuh. |
 | **Buku Mantra (Grimoire)** | Ya | Ya | Referensi edukasi harus selalu bisa diakses kapan saja. |
@@ -238,7 +238,7 @@ Setiap level memiliki nilai standar langkah optimal (`par_steps`):
    * Loop tanpa batas: Dicegat oleh VM pada langkah ke-100 dengan pesan: *"Energi manamu habis! Periksa apakah jumlah perulanganmu terlalu banyak."*
    * Error rendering: Error Boundary menangkap kesalahan dan menampilkan tombol ramah: *"Mulai Ulang Arena"*.
 4. **Offline & Gangguan Jaringan**:
-   * Aplikasi beroperasi dengan prinsip *Offline-First*: seluruh logika simulasi dan definisi 15 level berjalan penuh di browser tanpa perlu koneksi internet aktif.
+   * Aplikasi beroperasi dengan prinsip *Offline-First*: seluruh logika simulasi dan definisi 18 level berjalan penuh di browser tanpa perlu koneksi internet aktif.
    * Jika jaringan mati saat verifikasi cloud, data disimpan ke antrean lokal dan disinkronkan otomatis saat jaringan pulih kembali.
 
 ---

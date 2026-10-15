@@ -103,7 +103,7 @@ export default function HomePage() {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm font-semibold text-spell-purple-300">
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-spell-gold-400 fill-spell-gold-400" />
-              <span>15 Level Terkurasi di 2 Realm</span>
+              <span>18 Level Terkurasi di 3 Realm</span>
             </div>
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-spell-teal-400" />
@@ -152,7 +152,7 @@ export default function HomePage() {
                 <div>
                   <span className="text-[11px] font-bold text-spell-purple-400 block">Bintang</span>
                   <span className="text-sm font-mono font-black text-spell-gold-300">
-                    {summary?.totalStars || 0} / {summary?.maxStars || 45}
+                    {summary?.totalStars || 0} / {summary?.maxStars || 54}
                   </span>
                 </div>
               </div>
@@ -163,7 +163,7 @@ export default function HomePage() {
                 <div>
                   <span className="text-[11px] font-bold text-spell-purple-400 block">Misi Tuntas</span>
                   <span className="text-sm font-mono font-black text-white">
-                    {summary?.completedCount || 0} / {summary?.totalLevels || 15}
+                    {summary?.completedCount || 0} / {summary?.totalLevels || 18}
                   </span>
                 </div>
               </div>
@@ -264,16 +264,16 @@ export default function HomePage() {
       {/* REALM SHOWCASE DENGAN AKSES CEPAT */}
       <section className="py-16 bg-spell-purple-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 p-8 sm:p-12 rounded-dialog bg-gradient-to-r from-spell-purple-900 via-spell-purple-950 to-spell-purple-900 border-2 border-spell-purple-800 shadow-card-fantasy">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 p-8 sm:p-12 rounded-dialog bg-gradient-to-r from-spell-purple-900 via-spell-purple-950 to-spell-purple-900 border-2 border-spell-purple-800 shadow-card-fantasy">
             <div className="max-w-xl">
               <Badge variant="gold" size="md">
                 <span>Petualangan Menanti</span>
               </Badge>
               <h2 className="text-2xl sm:text-4xl font-black text-white mt-3">
-                Jelajahi 2 Realm Sihir Pertama
+                Jelajahi 3 Realm Sihir Petualangan
               </h2>
               <p className="mt-3 text-sm sm:text-base text-spell-purple-200 leading-relaxed">
-                Dari hutan peri <strong>Whispering Woods</strong> hingga lorong bawah tanah <strong>Crystal Caverns</strong>, setiap level dirancang menantang rasa ingin tahu anak secara terstruktur.
+                Dari hutan peri <strong>Whispering Woods</strong>, lorong bawah tanah <strong>Crystal Caverns</strong>, hingga benteng awan <strong>Cloud Citadel</strong>, setiap level dirancang menantang rasa ingin tahu anak secara terstruktur.
               </p>
               <div className="mt-6 flex items-center gap-4">
                 <Link href="/map">
@@ -289,33 +289,47 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Kartu Realm Preview */}
-            <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
+            {/* Kartu Realm Preview - 3 Worlds */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full lg:w-auto">
               <Link href="/map" className="group">
                 <Card
                   variant="interactive"
-                  className="p-4 flex flex-col items-center text-center bg-spell-purple-800/60 border-spell-purple-600/50"
+                  className="p-3.5 flex flex-col items-center text-center bg-spell-purple-800/60 border-spell-purple-600/50 hover:border-spell-emerald-400 transition-all"
                 >
-                  <div className="w-12 h-12 rounded-full bg-spell-emerald-500/20 text-spell-emerald-300 flex items-center justify-center font-bold text-xl mb-2">
+                  <div className="w-11 h-11 rounded-full bg-spell-emerald-500/20 text-spell-emerald-300 flex items-center justify-center font-bold text-xl mb-2">
                     🌲
                   </div>
                   <h4 className="font-bold text-white text-sm">World 1</h4>
                   <p className="text-xs text-spell-purple-300">Whispering Woods</p>
-                  <span className="mt-2 text-[11px] font-semibold text-spell-teal-300">8 Misi Sequencing</span>
+                  <span className="mt-2 text-[11px] font-semibold text-spell-teal-300">6 Misi Sequencing</span>
                 </Card>
               </Link>
 
               <Link href="/map" className="group">
                 <Card
                   variant="interactive"
-                  className="p-4 flex flex-col items-center text-center bg-spell-purple-800/60 border-spell-purple-600/50"
+                  className="p-3.5 flex flex-col items-center text-center bg-spell-purple-800/60 border-spell-purple-600/50 hover:border-spell-teal-400 transition-all"
                 >
-                  <div className="w-12 h-12 rounded-full bg-spell-teal-500/20 text-spell-teal-300 flex items-center justify-center font-bold text-xl mb-2">
+                  <div className="w-11 h-11 rounded-full bg-spell-teal-500/20 text-spell-teal-300 flex items-center justify-center font-bold text-xl mb-2">
                     💎
                   </div>
                   <h4 className="font-bold text-white text-sm">World 2</h4>
                   <p className="text-xs text-spell-purple-300">Crystal Caverns</p>
-                  <span className="mt-2 text-[11px] font-semibold text-spell-gold-300">7 Misi Loops</span>
+                  <span className="mt-2 text-[11px] font-semibold text-spell-gold-300">6 Misi Loops</span>
+                </Card>
+              </Link>
+
+              <Link href="/map" className="group">
+                <Card
+                  variant="interactive"
+                  className="p-3.5 flex flex-col items-center text-center bg-spell-purple-800/60 border-spell-purple-600/50 hover:border-spell-gold-400 transition-all"
+                >
+                  <div className="w-11 h-11 rounded-full bg-spell-gold-500/20 text-spell-gold-300 flex items-center justify-center font-bold text-xl mb-2">
+                    ☁️
+                  </div>
+                  <h4 className="font-bold text-white text-sm">World 3</h4>
+                  <p className="text-xs text-spell-purple-300">Cloud Citadel</p>
+                  <span className="mt-2 text-[11px] font-semibold text-spell-coral-300">6 Misi Conditionals</span>
                 </Card>
               </Link>
             </div>

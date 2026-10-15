@@ -52,19 +52,19 @@ Menghadirkan lingkungan belajar pemrograman yang imersif, menyenangkan, dan rama
 
 SpellCode dirancang dengan 3 Dunia Tematik, mencakup total 18 Level terkurasi:
 
-### World 1: Hutan Pemula (The Enchanted Forest) - 6 Level
+### World 1: Whispering Woods (Hutan Peri) - 6 Level
 * **Fokus Pembelajaran:** Logika Sekuensial (*Sequence*), Dekomposisi Masalah, dan Orientasi Spasial (Arah Hadap Kiri/Kanan).
 * **Rune yang Digunakan:** `Maju 1 Langkah`, `Putar Kiri (90°)`, `Putar Kanan (90°)`, `Nyalakan Lentera`.
-* **Prasyarat Buka World 2:** Menyelesaikan World 1 dengan akumulasi minimal 14 Bintang.
+* **Prasyarat Buka World 2:** Menyelesaikan level di World 1 dengan akumulasi minimal 8 Bintang Sihir.
 
-### World 2: Gua Kristal (The Crystal Caverns) - 6 Level
+### World 2: Crystal Caverns (Gua Kristal) - 6 Level
 * **Fokus Pembelajaran:** Perulangan (*Loops & Patterns*), Pengenalan Pola Berulang, dan Efisiensi Eksekusi Kode.
 * **Rune Tambahan:** `Ulangi N Kali (Repeat Block)`, `Ambil Kristal`.
-* **Prasyarat Buka World 3:** Menyelesaikan World 2 dengan akumulasi minimal 30 Bintang.
+* **Prasyarat Buka World 3:** Mengumpulkan akumulasi minimal 16 Bintang Sihir dari gabungan World 1 dan World 2.
 
-### World 3: Benteng Awan (The Nimbus Citadel) - 6 Level
-* **Fokus Pembelajaran:** Percabangan Kondisional (*Conditionals: If / Else*), Sensor Lingkungan (Deteksi Jurang, Deteksi Kabut, Deteksi Objek), dan Perulangan Bersarang (*Nested Constructs*).
-* **Rune Tambahan:** `Jika (If Condition)`, `Sensor Kabut`, `Sensor Jurang`, `Sensor Kristal`.
+### World 3: Cloud Citadel (Benteng Awan) - 6 Level
+* **Fokus Pembelajaran:** Percabangan Kondisional (*Conditionals: If / Else*), Evaluasi Logika Sensor Lingkungan, dan Eksekusi Terarah.
+* **Rune Tambahan:** `Jika (If Condition)`, `Sensor Jalan Depan (Eye Path Ahead)`, `Sensor Musuh/Jurang`.
 
 ---
 

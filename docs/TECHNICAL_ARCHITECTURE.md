@@ -315,7 +315,7 @@ Salah satu prinsip penting dalam game edukasi adalah menjaga integritas data tan
 * **Risiko**: Terlalu berambisi membangun visual scripting raksasa seperti Scratch (dengan puluhan blok) di tahap awal, yang berpotensi menunda penyelesaian game inti.
 * **Mitigasi**:
   * Membatasi set rune di MVP hanya pada 5 aksi dasar + 1 blok loop terhitung.
-  * Menyajikan 15 level terkurasi dengan progres kurva kesulitan yang matang sebelum menambah fitur tingkat lanjut.
+  * Menyajikan 18 level terkurasi di 3 realm tematik dengan progres kurva kesulitan yang matang sebelum menambah fitur tingkat lanjut.
 
 ---
 

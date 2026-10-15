@@ -47,7 +47,7 @@ SpellCode/
 │   ├── auth/                   # Server routes callback & signout
 │   ├── grimoire/               # Buku ensiklopedia panduan mantra
 │   ├── login/                  # Autentikasi ramah anak (Email, Kata Sandi, Magic Link)
-│   ├── map/                    # World Map petualangan (World 1 & World 2)
+│   ├── map/                    # World Map petualangan (World 1, World 2, & World 3)
 │   ├── play/[levelId]/         # Arena interaktif & editor mantra gameplay
 │   └── profile/                # Profil pemain, gelar penyihir, dan pencapaian
 ├── components/                 # Komponen UI modular berprinsip Atomic Design
@@ -57,7 +57,7 @@ SpellCode/
 ├── lib/                        # Domain logic & pure engine
 │   ├── audio/                  # Web Audio API sound manager & SFX generator
 │   ├── engine/                 # AST compiler, bytecode VM, pure state reducer, evaluator
-│   ├── levels/                 # Definisi level pedagogis World 1 & 2
+│   ├── levels/                 # Definisi level pedagogis World 1, 2, & 3 (18 Level)
 │   ├── storage/                # LocalStorage optimistic cache & draft AST autosave
 │   └── supabase/               # Client, server, middleware, auth validation, repository
 ├── supabase/                   # Konfigurasi basis data & RLS policies

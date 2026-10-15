@@ -258,7 +258,7 @@ Bangun antarmuka visual gameplay ramah anak di app/adventure/[worldId]/[levelId]
     add_heading2("Prompt 03: Kurikulum 18 Level & Evaluasi Par Efisiensi Kode")
     add_p("Sasaran: Merancang kurikulum 18 level di 3 dunia petualangan, algoritma Par Calculator 1-3 bintang, serta Step Debugger visual.")
     add_prompt_box("""Bangun kurikulum lengkap dan sistem evaluasi kualitas kode untuk SpellCode:
-1. Daftarkan 18 level terstruktur dalam lib/levels/registry.ts (Dunia 1 Lumina Coast 6 level sekuensial, Dunia 2 Chrono Dungeon 6 level loops, Dunia 3 Aether Highlands 6 level kondisional).
+1. Daftarkan 18 level terstruktur dalam lib/levels/ (World 1 Whispering Woods 6 level sekuensial, World 2 Crystal Caverns 6 level loops, World 3 Cloud Citadel 6 level kondisional).
 2. Terapkan sistem Par Calculator di lib/engine/parEvaluator.ts untuk mengevaluasi efisiensi susunan blok kode dan memberikan 1, 2, atau 3 bintang secara objektif.
 3. Buat fitur Step Debugger di komponen arena untuk mengeksekusi instruksi langkah demi langkah dengan highlight baris aktif.
 4. Buat unit test komprehensif di tests/levels.test.ts dan tests/parEvaluator.test.ts. Jalankan vitest dan verifikasi seluruh kurikulum valid.""")
