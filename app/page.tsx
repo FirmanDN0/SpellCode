@@ -50,16 +50,16 @@ export default function HomePage() {
   return (
     <div className="flex-1 flex flex-col">
       {/* HERO SECTION */}
-      <section className="relative overflow-hidden py-14 sm:py-20 border-b border-spell-purple-800/60 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.28)_0,rgba(15,6,34,1)_75%)]">
+      <section className="relative overflow-hidden py-10 sm:py-16 md:py-20 border-b border-spell-purple-800/60 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.28)_0,rgba(15,6,34,1)_75%)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center relative z-10">
           {/* Badge Gelar Akademi */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-spell-purple-900/90 border border-spell-purple-700 text-spell-gold-300 font-bold text-xs sm:text-sm shadow-md mb-6">
-            <Sparkles className="w-4 h-4 text-spell-gold-400" />
+          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-spell-purple-900/90 border border-spell-purple-700 text-spell-gold-300 font-bold text-xs sm:text-sm shadow-md mb-5 sm:mb-6">
+            <Sparkles className="w-4 h-4 text-spell-gold-400 shrink-0" />
             <span>Akademi Sihir SpellCode: Cast Spells with Code</span>
           </div>
 
           {/* Headline Utama */}
-          <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight max-w-4xl leading-tight">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight max-w-4xl leading-tight">
             Belajar Coding dengan Merapalkan{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-spell-gold-300 via-spell-gold-400 to-amber-500 drop-shadow-[0_4px_10px_rgba(245,158,11,0.3)]">
               Mantra Sihir!
@@ -67,19 +67,19 @@ export default function HomePage() {
           </h1>
 
           {/* Subhead Ramah Anak */}
-          <p className="mt-4 sm:mt-5 text-base sm:text-xl text-spell-purple-200 max-w-2xl font-medium leading-relaxed">
+          <p className="mt-3.5 sm:mt-5 text-sm sm:text-lg md:text-xl text-spell-purple-200 max-w-2xl font-medium leading-relaxed">
             Dunia akademi fantasi untuk anak usia 7-12 tahun. Susun rune instruksi, gerakkan penyihir magang, kumpulkan kristal mana, dan kuasai logika berpikir komputasi nyata!
           </p>
 
           {/* CTA Buttons - Dinamis Sesuai Progres Pemain */}
-          <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+          <div className="mt-7 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 w-full sm:w-auto">
             {currentLevel ? (
               <Link
                 href={isAllCompleted ? "/map" : `/play/${currentLevel.id}`}
                 className="w-full sm:w-auto"
               >
-                <Button variant="primary" size="lg" className="w-full sm:w-auto font-black text-base sm:text-lg px-8">
-                  <Play className="w-5 h-5 fill-spell-purple-950" />
+                <Button variant="primary" size="lg" className="w-full sm:w-auto font-black text-base sm:text-lg px-6 sm:px-8 min-h-[48px] justify-center">
+                  <Play className="w-5 h-5 fill-spell-purple-950 shrink-0" />
                   <span>
                     {isAllCompleted
                       ? "Jelajahi Peta Dunia"
@@ -91,8 +91,8 @@ export default function HomePage() {
               </Link>
             ) : (
               <Link href="/map" className="w-full sm:w-auto">
-                <Button variant="primary" size="lg" className="w-full sm:w-auto font-black text-lg px-8">
-                  <Play className="w-5 h-5 fill-spell-purple-950" />
+                <Button variant="primary" size="lg" className="w-full sm:w-auto font-black text-base sm:text-lg px-6 sm:px-8 min-h-[48px] justify-center">
+                  <Play className="w-5 h-5 fill-spell-purple-950 shrink-0" />
                   <span>Mulai Petualangan Sihir</span>
                 </Button>
               </Link>
@@ -102,16 +102,16 @@ export default function HomePage() {
               <Button
                 variant="secondary"
                 size="lg"
-                className="w-full sm:w-auto font-bold text-base px-6 border-spell-purple-600"
+                className="w-full sm:w-auto font-bold text-base px-6 min-h-[48px] border-spell-purple-600 justify-center"
               >
-                <BookOpen className="w-5 h-5 text-spell-teal-400" />
+                <BookOpen className="w-5 h-5 text-spell-teal-400 shrink-0" />
                 <span>Buku Mantra (Grimoire)</span>
               </Button>
             </Link>
           </div>
 
           {/* Jaminan Kenyamanan Anak & Orang Tua */}
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm font-semibold text-spell-purple-300">
+          <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm font-semibold text-spell-purple-300">
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-spell-gold-400 fill-spell-gold-400" />
               <span>18 Level Terkurasi di 3 Realm</span>
@@ -275,8 +275,8 @@ export default function HomePage() {
       {/* REALM SHOWCASE DENGAN AKSES CEPAT */}
       <section className="py-16 bg-spell-purple-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 p-8 sm:p-12 rounded-dialog bg-gradient-to-r from-spell-purple-900 via-spell-purple-950 to-spell-purple-900 border-2 border-spell-purple-800 shadow-card-fantasy">
-            <div className="max-w-xl">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8 p-5 sm:p-8 lg:p-12 rounded-dialog bg-gradient-to-r from-spell-purple-900 via-spell-purple-950 to-spell-purple-900 border-2 border-spell-purple-800 shadow-card-fantasy">
+            <div className="max-w-xl text-center lg:text-left">
               <Badge variant="gold" size="md">
                 <span>Petualangan Menanti</span>
               </Badge>
@@ -286,14 +286,14 @@ export default function HomePage() {
               <p className="mt-3 text-sm sm:text-base text-spell-purple-200 leading-relaxed">
                 Dari hutan peri <strong>Whispering Woods</strong>, lorong bawah tanah <strong>Crystal Caverns</strong>, hingga benteng awan <strong>Cloud Citadel</strong>, setiap level dirancang menantang rasa ingin tahu anak secara terstruktur.
               </p>
-              <div className="mt-6 flex items-center gap-4">
-                <Link href="/map">
-                  <Button variant="primary" size="md">
+              <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3 sm:gap-4">
+                <Link href="/map" className="w-full sm:w-auto">
+                  <Button variant="primary" size="md" className="w-full sm:w-auto min-h-[44px] justify-center font-bold">
                     <span>Buka Peta Dunia</span>
                   </Button>
                 </Link>
-                <Link href="/grimoire">
-                  <Button variant="ghost" size="md">
+                <Link href="/grimoire" className="w-full sm:w-auto">
+                  <Button variant="ghost" size="md" className="w-full sm:w-auto min-h-[44px] justify-center border border-spell-purple-700">
                     <span>Buka Grimoire</span>
                   </Button>
                 </Link>

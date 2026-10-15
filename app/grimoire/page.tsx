@@ -238,44 +238,44 @@ export default function GrimoirePage() {
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center p-1.5 rounded-rune bg-spell-purple-900 border border-spell-purple-700/80 shadow-inner">
+        <div className="w-full sm:w-auto grid grid-cols-3 sm:flex items-center p-1 sm:p-1.5 rounded-rune bg-spell-purple-900 border border-spell-purple-700/80 shadow-inner gap-1">
           <button
             type="button"
             onClick={() => setActiveTab("concepts")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 min-h-[42px] rounded-xl text-xs sm:text-sm font-bold transition-all ${
               activeTab === "concepts"
                 ? "bg-spell-purple-700 text-white shadow-rune-purple border border-spell-purple-500/50"
                 : "text-spell-purple-300 hover:text-white"
             }`}
           >
-            <Compass className="w-4 h-4 text-spell-gold-400" />
-            <span>Konsep Komputasi</span>
+            <Compass className="w-4 h-4 text-spell-gold-400 shrink-0" />
+            <span className="truncate">Konsep</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("runes")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 min-h-[42px] rounded-xl text-xs sm:text-sm font-bold transition-all ${
               activeTab === "runes"
                 ? "bg-spell-purple-700 text-white shadow-rune-purple border border-spell-purple-500/50"
                 : "text-spell-purple-300 hover:text-white"
             }`}
           >
-            <Sparkles className="w-4 h-4 text-spell-teal-400" />
-            <span>Kamus Rune</span>
+            <Sparkles className="w-4 h-4 text-spell-teal-400 shrink-0" />
+            <span className="truncate">Kamus Rune</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("familiars")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+            className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 min-h-[42px] rounded-xl text-xs sm:text-sm font-bold transition-all ${
               activeTab === "familiars"
                 ? "bg-spell-teal-700 text-white shadow-rune-teal border border-spell-teal-500/50"
                 : "text-spell-purple-300 hover:text-white"
             }`}
           >
-            <Heart className="w-4 h-4 text-spell-coral-400" />
-            <span>Familiar</span>
+            <Heart className="w-4 h-4 text-spell-coral-400 shrink-0" />
+            <span className="truncate">Familiar</span>
           </button>
         </div>
       </div>

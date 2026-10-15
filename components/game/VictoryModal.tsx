@@ -127,7 +127,7 @@ export function VictoryModal({
     >
       <div
         ref={modalRef}
-        className="relative w-full max-w-md p-6 sm:p-8 rounded-dialog bg-gradient-to-b from-spell-purple-900 to-spell-purple-950 border-2 border-spell-gold-400/80 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_40px_rgba(245,158,11,0.25)] flex flex-col items-center text-center"
+        className="relative w-full max-w-md p-5 sm:p-8 rounded-dialog bg-gradient-to-b from-spell-purple-900 to-spell-purple-950 border-2 border-spell-gold-400/80 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_40px_rgba(245,158,11,0.25)] flex flex-col items-center text-center"
       >
         {/* Hiasan Puncak */}
         <div className="absolute -top-6 px-6 py-1.5 rounded-full bg-gradient-to-r from-spell-gold-600 via-spell-gold-400 to-spell-gold-600 border-2 border-white text-spell-purple-950 font-black text-sm tracking-wider uppercase shadow-lg">

@@ -177,10 +177,10 @@ function LoginContent() {
 
   return (
     <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-md p-6 sm:p-8 rounded-dialog bg-spell-purple-900 border-2 border-spell-purple-700/80 shadow-card-fantasy flex flex-col items-center text-center">
+      <div className="w-full max-w-md p-5 sm:p-8 rounded-dialog bg-spell-purple-900 border-2 border-spell-purple-700/80 shadow-card-fantasy flex flex-col items-center text-center">
         {/* Ikon Gerbang Akademi */}
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-spell-purple-600 to-spell-purple-800 border-2 border-spell-purple-400/50 flex items-center justify-center text-spell-gold-300 shadow-rune-purple mb-4">
-          <Sparkles className="w-8 h-8" />
+        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-spell-purple-600 to-spell-purple-800 border-2 border-spell-purple-400/50 flex items-center justify-center text-spell-gold-300 shadow-rune-purple mb-4">
+          <Sparkles className="w-7 h-7 sm:w-8 sm:h-8" />
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-black text-white">
@@ -195,7 +195,7 @@ function LoginContent() {
         </p>
 
         {/* Tab Pemilihan Mode */}
-        <div className="w-full flex rounded-xl bg-spell-purple-950/70 p-1 border border-spell-purple-800/80 mt-5 mb-3">
+        <div className="w-full flex rounded-xl bg-spell-purple-950/70 p-1 border border-spell-purple-800/80 mt-5 mb-3 gap-1">
           <button
             type="button"
             disabled={isLoading}
@@ -203,7 +203,7 @@ function LoginContent() {
               setMode("login");
               setErrorMessage(null);
             }}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+            className={`flex-1 py-2 sm:py-2.5 min-h-[42px] text-xs font-bold rounded-lg transition-all ${
               mode === "login"
                 ? "bg-spell-purple-600 text-white shadow-sm"
                 : "text-spell-purple-300 hover:text-white"
@@ -218,7 +218,7 @@ function LoginContent() {
               setMode("signup");
               setErrorMessage(null);
             }}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+            className={`flex-1 py-2 sm:py-2.5 min-h-[42px] text-xs font-bold rounded-lg transition-all ${
               mode === "signup"
                 ? "bg-spell-purple-600 text-white shadow-sm"
                 : "text-spell-purple-300 hover:text-white"
@@ -233,7 +233,7 @@ function LoginContent() {
               setMode("magic_link");
               setErrorMessage(null);
             }}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+            className={`flex-1 py-2 sm:py-2.5 min-h-[42px] text-xs font-bold rounded-lg transition-all ${
               mode === "magic_link"
                 ? "bg-spell-purple-600 text-white shadow-sm"
                 : "text-spell-purple-300 hover:text-white"

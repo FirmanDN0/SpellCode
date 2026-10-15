@@ -480,39 +480,39 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
         </div>
       </div>
 
-      {/* Mobile Screen Tab Toggle (Layar Kecil < 768px) */}
-      <div className="flex lg:hidden items-center justify-center p-1 rounded-rune bg-spell-purple-900/80 border border-spell-purple-800 self-center">
+      {/* Mobile Screen Tab Toggle (Layar Kecil < 1024px) */}
+      <div className="grid grid-cols-3 lg:hidden w-full max-w-sm sm:max-w-md p-1 rounded-rune bg-spell-purple-900/90 border border-spell-purple-800 self-center shadow-inner gap-1">
         <button
           type="button"
           onClick={() => setMobileView("all")}
-          className={`px-3 sm:px-4 py-2 min-h-[38px] rounded-lg text-xs font-bold transition-all ${mobileView === "all"
+          className={`flex items-center justify-center px-2 py-2 min-h-[42px] rounded-lg text-xs font-bold transition-all ${mobileView === "all"
               ? "bg-spell-purple-700 text-white shadow-sm"
               : "text-spell-purple-300 hover:text-white"
             }`}
         >
-          Semua Tampilan
+          Semua
         </button>
         <button
           type="button"
           onClick={() => setMobileView("arena")}
-          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 min-h-[38px] rounded-lg text-xs font-bold transition-all ${mobileView === "arena"
+          className={`flex items-center justify-center gap-1.5 px-2 py-2 min-h-[42px] rounded-lg text-xs font-bold transition-all ${mobileView === "arena"
               ? "bg-spell-teal-700 text-white shadow-sm"
               : "text-spell-purple-300 hover:text-white"
             }`}
         >
-          <Compass className="w-3.5 h-3.5" />
-          <span>Arena Saja</span>
+          <Compass className="w-3.5 h-3.5 shrink-0" />
+          <span>Arena</span>
         </button>
         <button
           type="button"
           onClick={() => setMobileView("editor")}
-          className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 min-h-[38px] rounded-lg text-xs font-bold transition-all ${mobileView === "editor"
+          className={`flex items-center justify-center gap-1.5 px-2 py-2 min-h-[42px] rounded-lg text-xs font-bold transition-all ${mobileView === "editor"
               ? "bg-spell-purple-700 text-white shadow-sm"
               : "text-spell-purple-300 hover:text-white"
             }`}
         >
-          <Code2 className="w-3.5 h-3.5" />
-          <span>Editor Mantra</span>
+          <Code2 className="w-3.5 h-3.5 shrink-0" />
+          <span>Editor</span>
         </button>
       </div>
 
@@ -522,6 +522,19 @@ function PlayLevelContent({ level }: { level: LevelDefinition }) {
         {(mobileView === "all" || mobileView === "arena") && (
           <div className="lg:col-span-5 flex flex-col gap-4">
             <ArenaGrid state={gridState} isMoving={isRunning} />
+            {mobileView === "arena" && (
+              <ControlBar
+                isRunning={isRunning}
+                canPlay={program.nodes.length > 0}
+                hasBlocks={program.nodes.length > 0}
+                onPlay={handlePlay}
+                onStep={handleStep}
+                onReset={handleReset}
+                onClear={handleClearDeck}
+                speed={speed}
+                onToggleSpeed={() => setSpeed((s) => (s === 1 ? 2 : 1))}
+              />
+            )}
             <DebuggerGuide
               message={getGuideMessage()}
               hintText={level.hint}

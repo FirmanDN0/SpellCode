@@ -147,7 +147,7 @@ export function Navbar() {
           {/* Mobile Menu Trigger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-rune bg-spell-purple-800 text-spell-purple-200 hover:text-white border border-spell-purple-700 min-w-[40px] min-h-[40px] flex items-center justify-center transition-colors"
+            className="md:hidden p-2 rounded-rune bg-spell-purple-800 text-spell-purple-200 hover:text-white border border-spell-purple-700 min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
             aria-label="Buka Menu Navigasi"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

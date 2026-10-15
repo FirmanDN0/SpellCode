@@ -197,14 +197,14 @@ export function SpellDeck({
                   </div>
 
                   {/* Kontrol Interaksi Blok: Naik, Turun, Hapus */}
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 shrink-0">
                     {onMoveNode && (
                       <>
                         <button
                           type="button"
                           disabled={disabled || index === 0}
                           onClick={() => handleMove(index, index - 1)}
-                          className="p-1 rounded text-spell-purple-300 hover:text-white hover:bg-black/20 disabled:opacity-20 transition-colors"
+                          className="p-1.5 sm:p-1 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-spell-purple-300 hover:text-white hover:bg-black/20 disabled:opacity-20 transition-colors"
                           title="Geser ke atas"
                           aria-label={`Geser langkah ${index + 1} ke atas`}
                         >
@@ -214,7 +214,7 @@ export function SpellDeck({
                           type="button"
                           disabled={disabled || index === nodes.length - 1}
                           onClick={() => handleMove(index, index + 1)}
-                          className="p-1 rounded text-spell-purple-300 hover:text-white hover:bg-black/20 disabled:opacity-20 transition-colors"
+                          className="p-1.5 sm:p-1 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-spell-purple-300 hover:text-white hover:bg-black/20 disabled:opacity-20 transition-colors"
                           title="Geser ke bawah"
                           aria-label={`Geser langkah ${index + 1} ke bawah`}
                         >
@@ -227,7 +227,7 @@ export function SpellDeck({
                       type="button"
                       disabled={disabled}
                       onClick={() => handleRemove(node.id)}
-                      className="p-1 rounded text-spell-purple-400 hover:text-spell-coral-400 hover:bg-black/20 transition-colors disabled:opacity-30 ml-1"
+                      className="p-1.5 sm:p-1 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-spell-purple-400 hover:text-spell-coral-400 hover:bg-black/20 transition-colors disabled:opacity-30 ml-0.5"
                       title="Hapus balok ini"
                       aria-label={`Hapus langkah ${index + 1}`}
                     >
@@ -253,7 +253,7 @@ export function SpellDeck({
                   }`}
                 >
                   {/* Header Repeat Block */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-center gap-2">
                       <span className="w-6 h-6 rounded-md bg-amber-500/30 flex items-center justify-center text-xs font-mono font-bold text-spell-gold-300">
                         {index + 1}
@@ -264,7 +264,7 @@ export function SpellDeck({
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       {/* Counter Stepper */}
                       {onUpdateRepeatCount && (
                         <div className="flex items-center bg-spell-purple-900 rounded-md border border-spell-purple-700">
@@ -272,7 +272,7 @@ export function SpellDeck({
                             type="button"
                             disabled={disabled || repeatNode.count <= 2}
                             onClick={() => onUpdateRepeatCount(node.id, repeatNode.count - 1)}
-                            className="p-1 text-spell-purple-300 hover:text-white disabled:opacity-30"
+                            className="p-1.5 text-spell-purple-300 hover:text-white disabled:opacity-30 min-w-[28px] min-h-[28px] flex items-center justify-center"
                             aria-label="Kurangi jumlah perulangan"
                           >
                             <Minus className="w-3.5 h-3.5" />
@@ -284,7 +284,7 @@ export function SpellDeck({
                             type="button"
                             disabled={disabled || repeatNode.count >= 10}
                             onClick={() => onUpdateRepeatCount(node.id, repeatNode.count + 1)}
-                            className="p-1 text-spell-purple-300 hover:text-white disabled:opacity-30"
+                            className="p-1.5 text-spell-purple-300 hover:text-white disabled:opacity-30 min-w-[28px] min-h-[28px] flex items-center justify-center"
                             aria-label="Tambah jumlah perulangan"
                           >
                             <Plus className="w-3.5 h-3.5" />
@@ -299,7 +299,7 @@ export function SpellDeck({
                             type="button"
                             disabled={disabled || index === 0}
                             onClick={() => handleMove(index, index - 1)}
-                            className="p-1 rounded text-spell-purple-300 hover:text-white disabled:opacity-20"
+                            className="p-1.5 sm:p-1 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-spell-purple-300 hover:text-white disabled:opacity-20"
                             title="Geser ke atas"
                             aria-label={`Geser blok perulangan ${index + 1} ke atas`}
                           >
@@ -309,7 +309,7 @@ export function SpellDeck({
                             type="button"
                             disabled={disabled || index === nodes.length - 1}
                             onClick={() => handleMove(index, index + 1)}
-                            className="p-1 rounded text-spell-purple-300 hover:text-white disabled:opacity-20"
+                            className="p-1.5 sm:p-1 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-spell-purple-300 hover:text-white disabled:opacity-20"
                             title="Geser ke bawah"
                             aria-label={`Geser blok perulangan ${index + 1} ke bawah`}
                           >
@@ -322,7 +322,7 @@ export function SpellDeck({
                         type="button"
                         disabled={disabled}
                         onClick={() => handleRemove(node.id)}
-                        className="p-1 text-spell-purple-400 hover:text-spell-coral-400 disabled:opacity-30"
+                        className="p-1.5 sm:p-1 min-w-[32px] min-h-[32px] flex items-center justify-center text-spell-purple-400 hover:text-spell-coral-400 disabled:opacity-30 ml-0.5"
                         title="Hapus blok perulangan"
                         aria-label="Hapus blok perulangan"
                       >
@@ -546,8 +546,8 @@ export function SpellDeck({
                       : ""
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="w-6 h-6 rounded-md bg-cyan-500/30 flex items-center justify-center text-xs font-mono font-bold text-cyan-300">
                         {index + 1}
                       </span>
@@ -560,7 +560,7 @@ export function SpellDeck({
                         onChange={(e) =>
                           onUpdateCondition?.(node.id, e.target.value as ConditionType)
                         }
-                        className="bg-cyan-900 border border-cyan-600 text-cyan-100 text-xs rounded px-2 py-1 font-bold focus:outline-none focus:ring-1 focus:ring-cyan-400"
+                        className="bg-cyan-900 border border-cyan-600 text-cyan-100 text-xs rounded px-2 py-1 font-bold focus:outline-none focus:ring-1 focus:ring-cyan-400 max-w-[170px] sm:max-w-none"
                       >
                         <option value="IS_OBSTACLE_AHEAD">Ada Rintangan di Depan</option>
                         <option value="IS_CLEAR_AHEAD">Jalan Terbuka di Depan</option>
@@ -570,14 +570,14 @@ export function SpellDeck({
                       </select>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       {onMoveNode && (
                         <>
                           <button
                             type="button"
                             disabled={disabled || index === 0}
                             onClick={() => handleMove(index, index - 1)}
-                            className="p-1 rounded text-spell-purple-300 hover:text-white disabled:opacity-20"
+                            className="p-1.5 sm:p-1 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-spell-purple-300 hover:text-white disabled:opacity-20"
                             title="Geser ke atas"
                             aria-label={`Geser blok jika ${index + 1} ke atas`}
                           >
@@ -587,7 +587,7 @@ export function SpellDeck({
                             type="button"
                             disabled={disabled || index === nodes.length - 1}
                             onClick={() => handleMove(index, index + 1)}
-                            className="p-1 rounded text-spell-purple-300 hover:text-white disabled:opacity-20"
+                            className="p-1.5 sm:p-1 min-w-[32px] min-h-[32px] flex items-center justify-center rounded text-spell-purple-300 hover:text-white disabled:opacity-20"
                             title="Geser ke bawah"
                             aria-label={`Geser blok jika ${index + 1} ke bawah`}
                           >
@@ -600,7 +600,7 @@ export function SpellDeck({
                         type="button"
                         disabled={disabled}
                         onClick={() => handleRemove(node.id)}
-                        className="p-1 text-spell-purple-400 hover:text-spell-coral-400 disabled:opacity-30"
+                        className="p-1.5 sm:p-1 min-w-[32px] min-h-[32px] flex items-center justify-center text-spell-purple-400 hover:text-spell-coral-400 disabled:opacity-30 ml-0.5"
                         title="Hapus blok jika"
                         aria-label="Hapus blok jika"
                       >

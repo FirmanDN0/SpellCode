@@ -150,11 +150,11 @@ export default function WorldMapPage() {
         </div>
 
         {/* Tab Pemilihan World */}
-        <div className="flex items-center p-1.5 rounded-rune bg-spell-purple-900 border border-spell-purple-700/80 shadow-inner flex-wrap gap-1">
+        <div className="w-full lg:w-auto grid grid-cols-1 sm:grid-cols-3 items-center p-1 sm:p-1.5 rounded-rune bg-spell-purple-900 border border-spell-purple-700/80 shadow-inner gap-1">
           <button
             type="button"
             onClick={() => handleWorldSwitch(1)}
-            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${selectedWorld === 1
+            className={`flex items-center justify-center gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 min-h-[42px] rounded-xl text-xs sm:text-sm font-bold transition-all ${selectedWorld === 1
                 ? "bg-spell-purple-700 text-white shadow-rune-purple border border-spell-purple-500/50"
                 : "text-spell-purple-300 hover:text-white"
               }`}
@@ -165,7 +165,7 @@ export default function WorldMapPage() {
           <button
             type="button"
             onClick={() => handleWorldSwitch(2)}
-            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${selectedWorld === 2
+            className={`flex items-center justify-center gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 min-h-[42px] rounded-xl text-xs sm:text-sm font-bold transition-all ${selectedWorld === 2
                 ? "bg-spell-teal-700 text-white shadow-rune-teal border border-spell-teal-500/50"
                 : "text-spell-purple-300 hover:text-white"
               }`}
@@ -181,7 +181,7 @@ export default function WorldMapPage() {
           <button
             type="button"
             onClick={() => handleWorldSwitch(3)}
-            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${selectedWorld === 3
+            className={`flex items-center justify-center gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 min-h-[42px] rounded-xl text-xs sm:text-sm font-bold transition-all ${selectedWorld === 3
                 ? "bg-spell-gold-500 text-spell-purple-950 font-black shadow-rune-gold border border-spell-gold-400"
                 : "text-spell-purple-300 hover:text-white"
               }`}
