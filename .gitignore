@@ -20,6 +20,8 @@
 *.pem
 ~$*
 *.tmp
+.vscode/
+.idea/
 
 # debug logs
 npm-debug.log*
