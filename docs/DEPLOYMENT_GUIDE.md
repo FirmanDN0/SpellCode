@@ -26,7 +26,7 @@ Konfigurasikan variabel lingkungan berikut di dashboard hosting Vercel dan file 
 | `NEXT_PUBLIC_SUPABASE_URL` | Client & Server | Ya | `https://xyzproject.supabase.co` | URL endpoint API instance Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Client & Server | Ya | `eyJhbGciOiJIUzI1Ni...` | Kunci publik Supabase (dibatasi oleh RLS) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-Only | Ya | `eyJhbGciOiJIUzI1Ni...` | Kunci administratif untuk validasi progres server |
-| `NEXT_PUBLIC_SITE_URL` | Client & Server | Opsional | `https://spellcode.vercel.app` | URL dasar untuk redirect callback autentikasi |
+| `NEXT_PUBLIC_SITE_URL` | Client & Server | Opsional | `https://spell-code-nine.vercel.app` | URL dasar untuk redirect callback autentikasi |
 
 > **PERINGATAN KEAMANAN**:  
 > Jangan pernah menambahkan awalan `NEXT_PUBLIC_` pada `SUPABASE_SERVICE_ROLE_KEY`. Kunci ini memiliki privilese bypass RLS dan hanya boleh diakses di lingkungan Node.js server.
@@ -63,10 +63,10 @@ Daftar file migrasi di folder `supabase/migrations/`:
 
 ### Langkah 3: Konfigurasi Supabase Auth Redirect
 Buka **Supabase Dashboard > Authentication > URL Configuration**:
-- **Site URL**: `https://spellcode.vercel.app` (atau `http://localhost:3000` untuk development)
+- **Site URL**: `https://spell-code-nine.vercel.app` (atau `http://localhost:3000` untuk development)
 - **Redirect URLs**:
   - `http://localhost:3000/auth/callback`
-  - `https://spellcode.vercel.app/auth/callback`
+  - `https://spell-code-nine.vercel.app/auth/callback`
   - `https://*.vercel.app/auth/callback` (untuk preview branch deployments)
 
 ---
@@ -123,7 +123,7 @@ Aplikasi dapat dibuka di browser pada alamat: `http://localhost:3000`.
    - `NEXT_PUBLIC_SUPABASE_URL` = nilai dari Supabase
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = nilai dari Supabase
    - `SUPABASE_SERVICE_ROLE_KEY` = nilai service role Supabase
-   - `NEXT_PUBLIC_SITE_URL` = URL domain Vercel Anda (misal `https://spellcode.vercel.app`)
+   - `NEXT_PUBLIC_SITE_URL` = URL domain Vercel Anda (`https://spell-code-nine.vercel.app`)
 6. Klik **"Deploy"**. Vercel akan otomatis melakukan build produksi, static page generation, dan mempublikasikan aplikasi.
 
 ---
